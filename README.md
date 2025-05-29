@@ -9,7 +9,7 @@
 
 ### Week 1: Foundation Building 🏗️
 
-- [ ] **Day 1 (May 29)** - Hello World & Variables → [Code](https://github.com/NONSTOPPEBLE/25-Days-AI-Journey/blob/main/Day1/main.py) | [Video](https://claude.ai/chat/link)
+- [ ] **Day 1 (May 29)** - Hello World & Variables → [Code](https://github.com/NONSTOPPEBLE/25-Days-AI-Journey/blob/main/Day1/main.py) | [Video](https://www.instagram.com/reel/DKNXKfmME1r/?utm_source=ig_web_copy_link)
   - ✨ First Python program
   - ✨ Input/output basics
   - ✨ Variable types (strings, numbers)
