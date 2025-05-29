@@ -14,7 +14,7 @@
   - ✨ Input/output basics
   - ✨ Variable types (strings, numbers)
 
-- [ ] **Day 2 (May 30)** - Smart Calculator → [Code](https://claude.ai/chat/Day2/main.py) | [Video](https://claude.ai/chat/link)
+- [ ] **Day 2 (May 30)** - Smart Calculator → [Code](https://github.com/NONSTOPPEBLE/25-Days-AI-Journey/blob/main/Day2/main.py) | [Video](https://claude.ai/chat/link)
   - ✨ Mathematical operations
   - ✨ Conditional statements (if/elif/else)
   - ✨ Type conversion
