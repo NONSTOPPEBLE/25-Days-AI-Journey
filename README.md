@@ -148,7 +148,7 @@
 
 ## 🎬 Video Journey Playlist
 
-- [Day 1: Hello World](https://claude.ai/chat/your-video-link)
+- [Day 1: Hello World](https://www.instagram.com/reel/DKNXKfmME1r/?utm_source=ig_web_copy_link)
 - [Day 2: Smart Calculator](https://claude.ai/chat/your-video-link)
 - [Day 3: Lists & Loops](https://claude.ai/chat/your-video-link)
 - [Day 4: Functions](https://claude.ai/chat/your-video-link)
