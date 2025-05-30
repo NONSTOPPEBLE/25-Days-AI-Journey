@@ -1,33 +1,578 @@
-<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Day 3: AI LEARNING</title>
+    <title>Day 3: 3D Python Lists & Loops Visualizer</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style src="vatsal.css">
-        </head>
+         * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Monaco', 'Consolas', monospace;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* Collapsible Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(15px);
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 2px solid #00ff88;
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .header.collapsed {
+            transform: translateY(-80%);
+        }
+
+        .header-toggle {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            border: none;
+            border-radius: 0 0 15px 15px;
+            padding: 8px 20px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .header-toggle:hover {
+            background: linear-gradient(45deg, #00ccff, #00ff88);
+            transform: translateX(-50%) scale(1.05);
+        }
+
+        .day-badge {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: #000;
+            padding: 6px 12px;
+            border-radius: 15px;
+            display: inline-block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 12px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #aaa;
+            font-size: 0.9em;
+        }
+
+        /* Full-screen 3D Container */
+        #threejs-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Collapsible Controls Panel */
+        .controls-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px 20px 0 0;
+            border: 2px solid #00ff88;
+            border-bottom: none;
+            padding: 20px;
+            box-shadow: 0 -10px 30px rgba(0, 255, 136, 0.3);
+            transform: translateY(calc(100% - 60px));
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .controls-panel.expanded {
+            transform: translateY(0);
+        }
+
+        .controls-toggle {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            border: none;
+            border-radius: 20px 20px 0 0;
+            padding: 10px 25px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 -5px 15px rgba(0, 255, 136, 0.2);
+        }
+
+        .controls-toggle:hover {
+            background: linear-gradient(45deg, #00ccff, #00ff88);
+            transform: translateX(-50%) translateY(-2px);
+        }
+
+        .controls-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #00ff88;
+        }
+
+        .controls-title {
+            color: #00ff88;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* Collapsible Stats Panel */
+        .stats-panel {
+            position: fixed;
+            top: 100px;
+            right: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(15px);
+            border-radius: 15px 0 0 15px;
+            border: 2px solid #00ff88;
+            border-right: none;
+            padding: 20px;
+            min-width: 200px;
+            transform: translateX(calc(100% - 40px));
+            transition: transform 0.3s ease;
+        }
+
+        .stats-panel.expanded {
+            transform: translateX(0);
+        }
+
+        .stats-toggle {
+            position: absolute;
+            left: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #00ff88, #00ccff);
+            border: none;
+            border-radius: 15px 0 0 15px;
+            padding: 15px 8px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .stats-toggle:hover {
+            background: linear-gradient(135deg, #00ccff, #00ff88);
+            transform: translateY(-50%) translateX(-2px);
+        }
+
+        .code-input-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .code-input {
+            flex: 1;
+            min-width: 200px;
+            background: #1a1a2e;
+            border: 2px solid #00ff88;
+            border-radius: 8px;
+            padding: 12px;
+            color: #00ff88;
+            font-family: 'Monaco', monospace;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .code-input:focus {
+            border-color: #00ccff;
+            box-shadow: 0 0 15px rgba(0, 204, 255, 0.3);
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Monaco', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff4757, #ff6b7a);
+            color: #fff;
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, #ffa502, #ff6348);
+            color: #fff;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 10px;
+        }
+
+        .python-console {
+            background: #0f0f23;
+            border: 1px solid #00ff88;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Monaco', monospace;
+            font-size: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .console-output {
+            color: #00ff88;
+        }
+
+        .console-error {
+            color: #ff4757;
+        }
+
+        .console-input {
+            color: #00ccff;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: #aaa;
+            font-size: 12px;
+        }
+
+        .stat-value {
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .code-blocks {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .code-block {
+            background: #1a1a2e;
+            border: 1px solid #00ff88;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 11px;
+        }
+
+        .code-block-title {
+            color: #00ccff;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .python-keyword {
+            color: #ff79c6;
+        }
+
+        .python-string {
+            color: #f1fa8c;
+        }
+
+        .python-comment {
+            color: #6272a4;
+        }
+
+        .python-number {
+            color: #bd93f9;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            transition: opacity 0.5s;
+        }
+
+        .loading-text {
+            font-size: 20px;
+            color: #00ff88;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            50% {
+                opacity: 1;
+            }
+
+            51%,
+            100% {
+                opacity: 0.3;
+            }
+        }
+
+        .visualization-controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tutorial-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #00ff88;
+            border-radius: 15px;
+            padding: 25px;
+            z-index: 3000;
+            max-width: 400px;
+            text-align: center;
+            display: none;
+        }
+
+        .tutorial-content h3 {
+            color: #00ff88;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .tutorial-content p {
+            color: #aaa;
+            margin-bottom: 15px;
+            line-height: 1.5;
+            font-size: 13px;
+        }
+
+        .close-tutorial {
+            background: #00ff88;
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        /* View Controls */
+        .view-controls {
+            position: fixed;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .view-btn {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff88;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            color: #00ff88;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .view-btn:hover {
+            background: rgba(0, 255, 136, 0.2);
+            transform: scale(1.1);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .controls-panel {
+                padding: 15px;
+                transform: translateY(calc(100% - 50px));
+            }
+
+            .stats-panel {
+                top: 80px;
+                min-width: 150px;
+                padding: 15px;
+                transform: translateX(calc(100% - 30px));
+            }
+
+            .code-input-section {
+                flex-direction: column;
+            }
+
+            .code-input {
+                min-width: auto;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .header {
+                padding: 10px 15px;
+            }
+
+            .view-controls {
+                left: 10px;
+            }
+
+            .view-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 14px;
+            }
+
+            .code-blocks {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Smooth scrollbar for panels */
+        .controls-panel::-webkit-scrollbar,
+        .python-console::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .controls-panel::-webkit-scrollbar-track,
+        .python-console::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+        }
+
+        .controls-panel::-webkit-scrollbar-thumb,
+        .python-console::-webkit-scrollbar-thumb {
+            background: #00ff88;
+            border-radius: 3px;
+        }
+
+        .controls-panel::-webkit-scrollbar-thumb:hover,
+        .python-console::-webkit-scrollbar-thumb:hover {
+            background: #00ccff;
+        }
+    </style>
+</head>
 
 <body>
     <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-text">Getting Ready...
-
-            A code By @hackthecode
-        </div>
+        <div class="loading-text">Initializing 3D Python Environment...</div>
     </div>
 
     <div class="container">
-        <div class="header">
-            <div class="day-badge">Day 3:Lists, Loops, Functions & Console UI(Using Python)</div>
+        <!-- Collapsible Header -->
+        <div class="header" id="header">
+            <div class="day-badge">Day 3: 25 Days to AI Developer</div>
             <h1>🐍 3D Python Lists & Loops</h1>
             <p class="subtitle">Interactive code visualization with Three.js</p>
+            <button class="header-toggle" onclick="toggleHeader()">
+                <span id="headerToggleText">Hide</span>
+            </button>
         </div>
 
+        <!-- Full-screen 3D Container -->
         <div id="threejs-container"></div>
 
-        <div class="stats-panel">
-            <h3 style="color: #00ff88; margin-bottom: 15px;">📊 Live Stats</h3>
+        <!-- View Controls -->
+        <div class="view-controls">
+            <button class="view-btn" onclick="resetCamera()" title="Reset View">🎯</button>
+            <button class="view-btn" onclick="toggleAnimation()" title="Toggle Animation">⏸️</button>
+            <button class="view-btn" onclick="toggleFullscreen()" title="Fullscreen">🔍</button>
+        </div>
+
+        <!-- Collapsible Stats Panel -->
+        <div class="stats-panel" id="statsPanel">
+            <button class="stats-toggle" onclick="toggleStats()">
+                <span id="statsToggleText">STATS</span>
+            </button>
+            <h3 style="color: #00ff88; margin-bottom: 12px; font-size: 14px;">📊 Live Stats</h3>
             <div class="stat-item">
                 <span>List Items:</span>
                 <span class="stat-value" id="listCount">0</span>
@@ -44,21 +589,35 @@
                 <span>Execution Time:</span>
                 <span class="stat-value" id="execTime">0ms</span>
             </div>
+            <div class="stat-item">
+                <span>3D Objects:</span>
+                <span class="stat-value" id="objectCount">0</span>
+            </div>
         </div>
 
-        <div class="controls-panel">
+        <!-- Collapsible Controls Panel -->
+        <div class="controls-panel" id="controlsPanel">
+            <button class="controls-toggle" onclick="toggleControls()">
+                <span id="controlsToggleText">Controls ⬆</span>
+            </button>
+
+            <div class="controls-header">
+                <div class="controls-title">🎮 Python Code Controls</div>
+                <button class="btn btn-primary btn-small" onclick="showTutorial()">Help</button>
+            </div>
+
             <div class="code-input-section">
                 <input type="text" class="code-input" id="listInput"
                     placeholder="Enter list item (e.g., 'Learn Python')" maxlength="50">
-                <button class="btn btn-primary" onclick="addToList()">Add to List</button>
+                <button class="btn btn-primary" onclick="addToList()">Add Item</button>
                 <button class="btn btn-warning" onclick="demonstrateLoop()">Run Loop</button>
                 <button class="btn btn-danger" onclick="clearAll()">Clear All</button>
             </div>
 
             <div class="visualization-controls">
-                <button class="btn btn-primary" onclick="showTutorial()">Tutorial</button>
-                <button class="btn btn-primary" onclick="executeCustomCode()">Execute Code</button>
-                <button class="btn btn-primary" onclick="toggleAnimation()">Toggle Animation</button>
+                <button class="btn btn-primary btn-small" onclick="executeCustomCode()">Execute Code</button>
+                <button class="btn btn-primary btn-small" onclick="randomizeColors()">Randomize Colors</button>
+                <button class="btn btn-primary btn-small" onclick="exportList()">Export List</button>
             </div>
 
             <div class="code-blocks">
@@ -84,7 +643,7 @@
             <div class="python-console" id="pythonConsole">
                 <span class="console-input">>>> # Python Interactive Console</span>
                 <span class="console-output">Welcome to Day 3: Lists & Loops Visualizer!</span>
-                <span class="console-output">Add items to see them rendered in 3D space.</span>
+                <span class="console-output">Click "Controls ⬆" to expand this panel.</span>
             </div>
         </div>
     </div>
@@ -92,16 +651,14 @@
     <div class="tutorial-overlay" id="tutorialOverlay">
         <div class="tutorial-content">
             <h3>🚀 How to Use the 3D Python Visualizer</h3>
-            <p>1. <strong>Add Items:</strong> Type in the input field and click "Add to List"</p>
-            <p>2. <strong>See 3D Magic:</strong> Watch your list items appear as 3D objects</p>
-            <p>3. <strong>Run Loops:</strong> Click "Run Loop" to see iteration in action</p>
-            <p>4. <strong>Interactive Learning:</strong> Rotate, zoom, and explore the 3D space</p>
+            <p><strong>🎮 Controls:</strong> Expand bottom panel for code input</p>
+            <p><strong>📊 Stats:</strong> View live statistics on the right</p>
+            <p><strong>🎯 View:</strong> Use left buttons to control camera</p>
+            <p><strong>📱 Mobile:</strong> All panels are collapsible for better viewing</p>
+            <p><strong>🐍 Code:</strong> Add items and run loops to see 3D magic!</p>
             <button class="close-tutorial" onclick="closeTutorial()">Got It!</button>
         </div>
     </div>
 
-    <script src="vatsal.script">
-        </script>
-</body>
-
-</html>
+    <script src="vatsal.js">
+        
