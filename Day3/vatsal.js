@@ -1,8 +1,13 @@
-// Global variables
+ // Global variables
         let scene, camera, renderer, listObjects = [], animationId;
         let pythonList = [];
         let isAnimating = true;
         let loopIterationCount = 0;
+        let panelStates = {
+            header: true,
+            controls: false,
+            stats: false
+        };
 
         // Initialize Three.js scene
         function initThreeJS() {
@@ -41,6 +46,9 @@
             gridHelper.position.y = -2;
             scene.add(gridHelper);
 
+            // Mouse controls for camera
+            addMouseControls();
+
             // Start animation loop
             animate();
 
@@ -51,6 +59,56 @@
                     document.getElementById('loadingOverlay').style.display = 'none';
                 }, 500);
             }, 2000);
+        }
+
+        // Add mouse controls for camera
+        function addMouseControls() {
+            let mouseDown = false;
+            let mouseX = 0;
+            let mouseY = 0;
+            let targetRotationX = 0;
+            let targetRotationY = 0;
+
+            renderer.domElement.addEventListener('mousedown', (event) => {
+                mouseDown = true;
+                mouseX = event.clientX;
+                mouseY = event.clientY;
+            });
+
+            renderer.domElement.addEventListener('mouseup', () => {
+                mouseDown = false;
+            });
+
+            renderer.domElement.addEventListener('mousemove', (event) => {
+                if (mouseDown) {
+                    const deltaX = event.clientX - mouseX;
+                    const deltaY = event.clientY - mouseY;
+
+                    targetRotationY += deltaX * 0.01;
+                    targetRotationX += deltaY * 0.01;
+
+                    mouseX = event.clientX;
+                    mouseY = event.clientY;
+                }
+            });
+
+            // Smooth camera rotation
+            function updateCamera() {
+                if (mouseDown || Math.abs(targetRotationX) > 0.01 || Math.abs(targetRotationY) > 0.01) {
+                    const radius = 15;
+                    camera.position.x = Math.cos(targetRotationY) * Math.cos(targetRotationX) * radius;
+                    camera.position.y = Math.sin(targetRotationX) * radius + 5;
+                    camera.position.z = Math.sin(targetRotationY) * Math.cos(targetRotationX) * radius;
+                    camera.lookAt(0, 0, 0);
+
+                    if (!mouseDown) {
+                        targetRotationX *= 0.95;
+                        targetRotationY *= 0.95;
+                    }
+                }
+                requestAnimationFrame(updateCamera);
+            }
+            updateCamera();
         }
 
         // Animation loop
@@ -66,18 +124,70 @@
                 }
             });
 
-            // Update camera orbit
-            if (isAnimating) {
-                const time = Date.now() * 0.0005;
-                camera.position.x = Math.cos(time) * 15;
-                camera.position.z = Math.sin(time) * 15;
-                camera.lookAt(0, 0, 0);
-            }
-
             renderer.render(scene, camera);
         }
 
-        // Add item to Python list and 3D scene
+        // Panel Toggle Functions
+        function toggleHeader() {
+            const header = document.getElementById('header');
+            const toggleText = document.getElementById('headerToggleText');
+            panelStates.header = !panelStates.header;
+
+            if (panelStates.header) {
+                header.classList.remove('collapsed');
+                toggleText.textContent = 'Hide';
+            } else {
+                header.classList.add('collapsed');
+                toggleText.textContent = 'Show';
+            }
+        }
+
+        function toggleControls() {
+            const panel = document.getElementById('controlsPanel');
+            const toggleText = document.getElementById('controlsToggleText');
+            panelStates.controls = !panelStates.controls;
+
+            if (panelStates.controls) {
+                panel.classList.add('expanded');
+                toggleText.textContent = 'Controls ⬇';
+            } else {
+                panel.classList.remove('expanded');
+                toggleText.textContent = 'Controls ⬆';
+            }
+        }
+
+        function toggleStats() {
+            const panel = document.getElementById('statsPanel');
+            const toggleText = document.getElementById('statsToggleText');
+            panelStates.stats = !panelStates.stats;
+
+            if (panelStates.stats) {
+                panel.classList.add('expanded');
+                toggleText.textContent = 'HIDE';
+            } else {
+                panel.classList.remove('expanded');
+                toggleText.textContent = 'STATS';
+            }
+        }
+
+        // View Control Functions
+        function resetCamera() {
+            camera.position.set(0, 5, 15);
+            camera.lookAt(0, 0, 0);
+            appendToConsole('Camera view reset', 'output');
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                appendToConsole('Entered fullscreen mode', 'output');
+            } else {
+                document.exitFullscreen();
+                appendToConsole('Exited fullscreen mode', 'output');
+            }
+        }
+
+        // Enhanced Python Functions
         function addToList() {
             const input = document.getElementById('listInput');
             const value = input.value.trim();
@@ -87,30 +197,24 @@
                 return;
             }
 
-            // Add to Python list
             pythonList.push(value);
             input.value = '';
 
-            // Create 3D object
             create3DListItem(value, pythonList.length - 1);
 
-            // Update console and code
             appendToConsole(`>>> my_list.append("${value}")`, 'input');
             appendToConsole(`List updated: ${JSON.stringify(pythonList)}`, 'output');
             updateListCode();
             updateStats();
         }
 
-        // Create 3D representation of list item
         function create3DListItem(text, index) {
-            // Create geometry based on text length
             const geometry = new THREE.BoxGeometry(
                 Math.max(2, text.length * 0.2),
                 1,
                 1
             );
 
-            // Create material with gradient colors
             const hue = (index * 60) % 360;
             const color = new THREE.Color(`hsl(${hue}, 70%, 50%)`);
             const material = new THREE.MeshPhongMaterial({
@@ -122,19 +226,17 @@
 
             const cube = new THREE.Mesh(geometry, material);
 
-            // Position cubes in a circle
-            const angle = (index / pythonList.length) * Math.PI * 2;
+            const angle = (index / Math.max(pythonList.length, 1)) * Math.PI * 2;
             const radius = 5;
             cube.position.x = Math.cos(angle) * radius;
             cube.position.z = Math.sin(angle) * radius;
             cube.position.y = 2;
 
-            // Add wireframe
             const wireframe = new THREE.WireframeGeometry(geometry);
             const line = new THREE.LineSegments(wireframe, new THREE.LineBasicMaterial({color: 0x00ff88}));
             cube.add(line);
 
-            // Add text label
+            // Text label
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
             canvas.width = 512;
@@ -169,7 +271,7 @@
             function update() {
                 const elapsed = Date.now() - startTime;
                 const progress = Math.min(elapsed / duration, 1);
-                const eased = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+                const eased = 1 - Math.pow(1 - progress, 3);
 
                 object.scale.x = startScale.x + (targetScale.x - startScale.x) * eased;
                 object.scale.y = startScale.y + (targetScale.y - startScale.y) * eased;
@@ -202,10 +304,8 @@
                     return;
                 }
 
-                // Highlight current object
                 const currentObject = listObjects[currentIndex];
                 if (currentObject) {
-                    // Flash effect
                     const originalColor = currentObject.material.color.clone();
                     currentObject.material.color.setHex(0xffff00);
 
@@ -213,7 +313,6 @@
                         currentObject.material.color.copy(originalColor);
                     }, 300);
 
-                    // Scale animation
                     animateScale(currentObject, {x: 1.2, y: 1.2, z: 1.2}, 150);
                     setTimeout(() => {
                         animateScale(currentObject, {x: 1, y: 1, z: 1}, 150);
@@ -231,7 +330,6 @@
 
         // Clear all objects and reset
         function clearAll() {
-            // Remove all 3D objects
             listObjects.forEach(obj => {
                 scene.remove(obj);
                 if (obj.geometry) obj.geometry.dispose();
@@ -247,6 +345,45 @@
 
             updateListCode();
             updateStats();
+        }
+
+        // New enhanced functions
+        function randomizeColors() {
+            listObjects.forEach((obj, index) => {
+                const hue = Math.random() * 360;
+                const color = new THREE.Color(`hsl(${hue}, 70%, 50%)`);
+                obj.material.color.copy(color);
+
+                // Animate color change
+                animateScale(obj, {x: 1.1, y: 1.1, z: 1.1}, 200);
+                setTimeout(() => {
+                    animateScale(obj, {x: 1, y: 1, z: 1}, 200);
+                }, 200);
+            });
+            appendToConsole('Colors randomized!', 'output');
+        }
+
+        function exportList() {
+            if (pythonList.length === 0) {
+                appendToConsole('Error: List is empty!', 'error');
+                return;
+            }
+
+            const exportData = {
+                list: pythonList,
+                timestamp: new Date().toISOString(),
+                itemCount: pythonList.length
+            };
+
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'python_list_export.json';
+            a.click();
+            URL.revokeObjectURL(url);
+
+            appendToConsole(`List exported: ${pythonList.length} items`, 'output');
         }
 
         // Update the displayed Python list code
@@ -285,7 +422,8 @@
             document.getElementById('listCount').textContent = pythonList.length;
             document.getElementById('loopCount').textContent = loopIterationCount;
             document.getElementById('codeLines').textContent = (pythonList.length * 2 + 5);
-            document.getElementById('execTime').textContent = Math.random() * 50 + 'ms';
+            document.getElementById('execTime').textContent = (Math.random() * 50).toFixed(1) + 'ms';
+            document.getElementById('objectCount').textContent = listObjects.length;
         }
 
         // Execute custom Python-like code
@@ -296,7 +434,6 @@
             appendToConsole(`>>> ${customCode}`, 'input');
 
             try {
-                // Simple interpreter for basic list operations
                 if (customCode.includes('append(')) {
                     const match = customCode.match(/append\(['"](.+?)['"]\)/);
                     if (match) {
@@ -307,6 +444,15 @@
                     clearAll();
                 } else if (customCode.includes('len(')) {
                     appendToConsole(`Length: ${pythonList.length}`, 'output');
+                } else if (customCode.includes('reverse()')) {
+                    pythonList.reverse();
+                    clearAll();
+                    pythonList.forEach((item, index) => {
+                        setTimeout(() => {
+                            create3DListItem(item, index);
+                        }, index * 100);
+                    });
+                    appendToConsole('List reversed!', 'output');
                 } else {
                     appendToConsole('Code executed (limited interpreter)', 'output');
                 }
@@ -318,6 +464,9 @@
         // Toggle animation
         function toggleAnimation() {
             isAnimating = !isAnimating;
+            const btn = document.querySelector('.view-btn[onclick="toggleAnimation()"]');
+            btn.textContent = isAnimating ? '⏸️' : '▶️';
+            btn.title = isAnimating ? 'Pause Animation' : 'Play Animation';
             appendToConsole(`Animation ${isAnimating ? 'enabled' : 'disabled'}`, 'output');
         }
 
@@ -338,7 +487,35 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        // Handle keyboard input
+        // Handle keyboard shortcuts
+        document.addEventListener('keydown', function (e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key) {
+                    case 'h':
+                        e.preventDefault();
+                        toggleHeader();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        toggleStats();
+                        break;
+                    case 'c':
+                        e.preventDefault();
+                        toggleControls();
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        resetCamera();
+                        break;
+                    case ' ':
+                        e.preventDefault();
+                        toggleAnimation();
+                        break;
+                }
+            }
+        });
+
+        // Handle input events
         document.getElementById('listInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 addToList();
@@ -351,7 +528,15 @@
             initThreeJS();
             updateStats();
 
-            // Add some sample data
+            // Welcome message with keyboard shortcuts
+            setTimeout(() => {
+                appendToConsole('📋 Keyboard Shortcuts:', 'output');
+                appendToConsole('Ctrl+H: Toggle Header | Ctrl+S: Toggle Stats', 'output');
+                appendToConsole('Ctrl+C: Toggle Controls | Ctrl+R: Reset Camera', 'output');
+                appendToConsole('Ctrl+Space: Toggle Animation', 'output');
+            }, 1000);
+
+            // Add some sample data after a delay
             setTimeout(() => {
                 const samples = ['Learn Python', 'Build Apps', 'Master AI'];
                 samples.forEach((sample, index) => {
@@ -360,5 +545,5 @@
                         addToList();
                     }, index * 1000);
                 });
-            }, 3000);
+            }, 2500);
         });
