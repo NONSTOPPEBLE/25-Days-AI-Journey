@@ -1,0 +1,151 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Consolas', monospace;
+  background: radial-gradient(circle at center, #0d0d1a 0%, #070716 100%);
+  color: #fff;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(15px);
+  padding: 20px;
+  text-align: center;
+  border-bottom: 2px solid #bb00ff;
+  box-shadow: 0 0 20px #bb00ff55;
+}
+
+.header.collapsed {
+  transform: translateY(-100%);
+  transition: transform 0.3s ease;
+}
+
+.header-toggle {
+  background: #bb00ff;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 20px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Badge */
+.day-badge {
+  background: linear-gradient(45deg, #bb00ff, #7700ff);
+  padding: 8px 20px;
+  color: #fff;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  margin-bottom: 10px;
+  display: inline-block;
+}
+
+/* Weather Panel */
+.panel {
+  background: rgba(20, 10, 30, 0.95);
+  border: 2px solid #7700ff;
+  border-radius: 20px;
+  padding: 25px;
+  width: 90%;
+  max-width: 400px;
+  margin: 140px auto 20px;
+  box-shadow: 0 0 25px #7700ffaa;
+  text-align: center;
+}
+
+.panel h2 {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  color: #fff;
+}
+
+.panel input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  outline: none;
+}
+
+.panel button {
+  background: linear-gradient(45deg, #9900ff, #bb00ff);
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  box-shadow: 0 0 10px #9900ff88;
+  transition: transform 0.2s ease;
+}
+
+.panel button:hover {
+  transform: scale(1.05);
+}
+
+/* Weather Results */
+.results-container {
+  max-width: 500px;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 10px;
+}
+
+.result-box {
+  background: rgba(0, 0, 0, 0.75);
+  border-left: 4px solid #9900ff;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 1rem;
+  display: flex;
+  justify-content: space-between;
+  box-shadow: 0 0 15px #7700ff55;
+}
+
+.result-box strong {
+  color: #bb00ff;
+}
+
+/* 3D Earth Canvas */
+#threejs-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .panel {
+    width: 95%;
+    padding: 20px;
+  }
+
+  .result-box {
+    font-size: 0.95rem;
+  }
+
+  .header h1 {
+    font-size: 1.3rem;
+  }
+    }
