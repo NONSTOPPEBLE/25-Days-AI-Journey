@@ -1,0 +1,85 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkyCast: Weather Visualizer</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head><body>
+  <!-- Header -->
+  <header class="header" id="header">
+    <div class="day-badge">DAY 5 - SkyCast</div>
+    <h1>🌌 SkyCast: Weather Visualizer</h1>
+    <p class="subtitle">A futuristic 3D weather experience</p>
+    <button class="header-toggle" onclick="toggleHeader()" id="toggleHeaderBtn">Hide Header</button>
+  </header>  <!-- 3D Earth Container -->  <div id="threejs-container"></div>  <!-- Search Panel -->  <div class="panel">
+    <h2>🔍 Search City</h2>
+    <input type="text" id="cityInput" placeholder="e.g. Mumbai, Tokyo" />
+    <button onclick="fetchWeather()">Get Weather</button>
+  </div>  <!-- Weather Results Panel -->  <div class="results-container">
+    <div class="result-box purple"><strong>📍 Location:</strong> <span id="city"></span></div>
+    <div class="result-box blue"><strong>📌 Type:</strong> <span id="location_type"></span></div>
+    <div class="result-box pink"><strong>🌡️ Temperature:</strong> <span id="temperature"></span></div>
+    <div class="result-box teal"><strong>💧 Humidity:</strong> <span id="humidity"></span></div>
+    <div class="result-box yellow"><strong>💨 Wind:</strong> <span id="wind_speed"></span></div>
+    <div class="result-box glow"><strong>☁️ Description:</strong> <span id="description"></span></div>
+  </div>  <script>
+    function toggleHeader() {
+      const header = document.getElementById('header');
+      const toggleBtn = document.getElementById('toggleHeaderBtn');
+      header.classList.toggle('collapsed');
+      toggleBtn.textContent = header.classList.contains('collapsed') ? 'Show Header' : 'Hide Header';
+    }
+
+    function fetchWeather() {
+      const city = document.getElementById('cityInput').value;
+      if (!city) return alert("Enter a city name");
+
+      fetch('/weather', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ city })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) return alert(data.error);
+          document.getElementById('city').textContent = data.city;
+          document.getElementById('location_type').textContent = data.location_type;
+          document.getElementById('temperature').textContent = data.temperature + ' °C';
+          document.getElementById('humidity').textContent = data.humidity + '%';
+          document.getElementById('wind_speed').textContent = data.wind_speed + ' m/s';
+          document.getElementById('description').textContent = data.description;
+        });
+    }
+
+    // 3D Earth Setup
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.getElementById('threejs-container').appendChild(renderer.domElement);
+
+    const texture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/JoshuaKGoldberg/earth-texture/main/earth.jpg');
+    const sphere = new THREE.Mesh(
+      new THREE.SphereGeometry(3, 64, 64),
+      new THREE.MeshStandardMaterial({ map: texture })
+    );
+    scene.add(sphere);
+    camera.position.z = 9;
+
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(5, 5, 5);
+    scene.add(light);
+
+    function animate() {
+      requestAnimationFrame(animate);
+      sphere.rotation.y += 0.002;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script></body></html>
