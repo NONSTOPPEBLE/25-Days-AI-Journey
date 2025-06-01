@@ -1,7 +1,7 @@
 # 🚀 25 Days: Zero to AI Developer (Mobile Only)
 
 **Challenge Duration:** May 28 – June 21, 2025  
-**Created by:** [Vatsal Gavit](https://github.com/vatsalgavit)  
+**Created by:** [Vatsal Gavit](https://github.com/NONSTOPPEBLE)  
 **Motto:** _"From zero to AI developer, one day at a time."_  
 **Tools Used:** Python, Replit Mobile, Flask, OpenAI API  
 **Goal:** Become an AI Developer using only a **mobile phone** 📱 — with no laptop or PC involved.
@@ -227,4 +227,4 @@
 ---
 
 **Let’s make mobile development powerful. Follow the journey!**  
-👉 [@vatsal.gavit](https://instagram.com/vatsal.gavit) | GitHub: [Vatsal Gavit](https://github.com/vatsalgavit)
+👉 [@vatsal.gavit](https://instagram.com/vatsal.gavitt) | GitHub: [Vatsal Gavit](https://github.com/NONSTOPPEBLE)
