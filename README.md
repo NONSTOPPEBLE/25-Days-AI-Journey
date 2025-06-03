@@ -227,4 +227,4 @@
 ---
 
 **Let’s make mobile development powerful. Follow the journey!**  
-👉 [@vatsal.gavit](https://instagram.com/vatsal.gavitt) | GitHub: [Vatsal Gavit](https://github.com/NONSTOPPEBLE)
+👉 [@vatsal.gavitt](https://instagram.com/vatsal.gavitt) | GitHub: [Vatsal Gavit](https://github.com/NONSTOPPEBLE)
