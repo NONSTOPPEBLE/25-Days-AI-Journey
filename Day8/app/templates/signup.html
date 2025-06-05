@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Sign Up</h2>
+<form method="POST">
+  {{ form.hidden_tag() }}
+  {{ form.username.label }}
+  {{ form.username(placeholder="Username") }}
+  {{ form.email.label }}
+  {{ form.email(placeholder="Email") }}
+  {{ form.password.label }}
+  {{ form.password(placeholder="Password") }}
+  {{ form.password2.label }}
+  {{ form.password2(placeholder="Repeat Password") }}
+  {{ form.submit() }}
+</form>
+<p>Already have an account? <a href="{{ url_for('auth.login') }}">Login</a></p>
+{% endblock %}

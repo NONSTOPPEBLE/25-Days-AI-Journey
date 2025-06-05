@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Image Generation</h2>
+<form method="POST">
+  <input type="text" name="prompt" placeholder="Enter image prompt..." required>
+  <button type="submit">Generate</button>
+</form>
+{% if image_url %}
+  <img src="{{ image_url }}" alt="Generated Image" style="margin-top:1rem; max-width:100%;">
+{% endif %}
+{% endblock %}

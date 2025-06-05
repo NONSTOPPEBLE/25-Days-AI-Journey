@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>AskNova AI Chat</h2>
+<div id="chat-box">
+  {% for m in history %}
+  <p><strong>{{ m.role }}:</strong> {{ m.content }}</p>
+  {% endfor %}
+</div>
+<form method="POST">
+  <input name="message" placeholder="Ask anything..." required />
+  <button>Send</button>
+</form>
+{% endblock %}

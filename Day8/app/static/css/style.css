@@ -1,0 +1,322 @@
+/* =======================
+   Reset & Base Styles
+======================= */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #121417;
+  color: #d0d8dc;
+  line-height: 1.7;
+  font-size: 16px;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* =======================
+   Chat Box Styles
+======================= */
+#chat-box {
+  max-width: 600px;
+  margin: 0 auto 2rem;
+  background: #1c262b;
+  border-radius: 16px;
+  padding: 1rem 1.5rem;
+  height: 400px;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(64, 224, 208, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+#chat-box p {
+  max-width: 75%;
+  padding: 0.8rem 1rem;
+  border-radius: 14px;
+  line-height: 1.4;
+  font-size: 1rem;
+  word-wrap: break-word;
+}
+
+#chat-box p:nth-child(odd) {
+  align-self: flex-end;
+  background: linear-gradient(135deg, #ff6b6b, #f06595);
+  color: #fff;
+  border-bottom-right-radius: 0;
+}
+
+#chat-box p:nth-child(even) {
+  align-self: flex-start;
+  background: #334a57;
+  color: #d0d8dc;
+  border-bottom-left-radius: 0;
+}
+
+#chat-box p strong {
+  font-weight: 700;
+  margin-right: 0.4rem;
+  user-select: text;
+  color: inherit;
+}
+
+/* Scrollbar Styling */
+#chat-box::-webkit-scrollbar {
+  width: 8px;
+}
+
+#chat-box::-webkit-scrollbar-track {
+  background: #121417;
+  border-radius: 10px;
+}
+
+#chat-box::-webkit-scrollbar-thumb {
+  background: #40e0d0;
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+#chat-box::-webkit-scrollbar-thumb:hover {
+  background: #38cfcf;
+}
+
+/* Responsive chat box height */
+@media (max-width: 640px) {
+  #chat-box {
+    height: 320px;
+  }
+}
+
+/* =======================
+   Header Styles
+======================= */
+header {
+  background: #1c262b;
+  color: #40e0d0; /* Teal Neon */
+  text-align: center;
+  padding: 1.8rem 1rem;
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  box-shadow: 0 3px 15px rgba(64, 224, 208, 0.25);
+  user-select: none;
+  /* Smooth text rendering */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =======================
+   Main Content Styles
+======================= */
+main {
+  padding: 2.5rem 1.5rem;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+/* =======================
+   Button Styles
+======================= */
+button {
+  background: linear-gradient(135deg, #ff6b6b, #f06595);
+  color: #fff;
+  border: none;
+  padding: 0.85rem 1.75rem;
+  border-radius: 14px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 
+    transform 0.25s ease, 
+    box-shadow 0.35s ease, 
+    background 0.35s ease;
+  box-shadow: 0 4px 15px rgba(240, 101, 149, 0.4);
+}
+
+button:hover,
+button:focus {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(240, 101, 149, 0.6);
+  background: linear-gradient(135deg, #ff8787, #f788ac);
+  outline: none;
+}
+
+/* =======================
+   Input & Select Styles
+======================= */
+input,
+select {
+  width: 100%;
+  padding: 0.85rem 1.15rem;
+  margin-bottom: 1.3rem;
+  border: 1.8px solid #334a57;
+  border-radius: 14px;
+  background: #1f2c33;
+  color: #e0e7eb;
+  font-size: 1rem;
+  transition: background 0.3s ease, border-color 0.3s ease;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+  font-family: 'Inter', sans-serif;
+}
+
+input::placeholder,
+select::placeholder {
+  color: #7a8a94;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  background: #2b3b44;
+  border-color: #40e0d0;
+  box-shadow: 0 0 12px rgba(64, 224, 208, 0.6);
+}
+
+/* =======================
+   Form Styles
+======================= */
+form {
+  background: rgba(28, 38, 43, 0.95);
+  padding: 2.5rem;
+  border-radius: 22px;
+  box-shadow: 0 0 28px rgba(255, 107, 107, 0.18);
+  backdrop-filter: saturate(180%) blur(10px);
+  max-width: 480px;
+  margin: 2rem auto;
+}
+
+/* =======================
+   Navbar Styles
+======================= */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem 2.5rem;
+  background-color: #1e2f38;
+  color: #b6cfd6;
+  position: relative;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1100;
+  user-select: none;
+  font-family: 'Inter', sans-serif;
+}
+
+.navbar-brand a {
+  color: #40e0d0;
+  text-decoration: none;
+  font-size: 1.9rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  transition: color 0.35s ease;
+}
+
+.navbar-brand a:hover,
+.navbar-brand a:focus {
+  color: #ff6b6b;
+  outline: none;
+}
+
+.nav-menu {
+  display: flex;
+  gap: 1.4rem;
+  align-items: center;
+  font-weight: 600;
+}
+
+.nav-link {
+  color: #d0e8ea;
+  text-decoration: none;
+  padding: 0.7rem 1.3rem;
+  border-radius: 12px;
+  transition: background-color 0.35s ease, color 0.35s ease;
+  letter-spacing: 0.02em;
+  font-size: 1rem;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+  background-color: rgba(255, 107, 107, 0.15);
+  color: #ff6b6b;
+  outline: none;
+}
+
+/* =======================
+   Hamburger Menu Styles
+======================= */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0.25rem 0;
+  z-index: 1200;
+}
+
+.hamburger span {
+  width: 28px;
+  height: 3.5px;
+  background-color: #b6cfd6;
+  margin: 5px 0;
+  border-radius: 3px;
+  transition: transform 0.35s ease, background-color 0.35s ease, opacity 0.35s ease;
+  transform-origin: center;
+}
+
+.hamburger.active span:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+  background-color: #ff6b6b;
+}
+
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+  background-color: #ff6b6b;
+}
+
+/* =======================
+   Mobile Navbar
+======================= */
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+
+  .nav-menu {
+    position: fixed;
+    left: -100%;
+    top: 65px;
+    flex-direction: column;
+    background-color: rgba(31, 45, 54, 0.98);
+    backdrop-filter: saturate(180%) blur(16px);
+    width: 100%;
+    text-align: center;
+    transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 12px 32px rgba(31, 45, 54, 0.85);
+    z-index: 1099;
+    padding: 2.5rem 0;
+    border-radius: 0 0 20px 20px;
+  }
+
+  .nav-menu.active {
+    left: 0;
+  }
+
+  .nav-link {
+    padding: 1.3rem 0;
+    display: block;
+    width: 100%;
+    font-size: 1.2rem;
+    letter-spacing: 0.04em;
+  }
+}

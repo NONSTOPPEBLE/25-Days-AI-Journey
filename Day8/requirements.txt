@@ -1,0 +1,13 @@
+flask
+flask_sqlalchemy
+flask_login
+flask_migrate
+flask_wtf
+python-dotenv
+cryptography
+openai
+flask
+flask_login
+flask_sqlalchemy
+openai
+werkzeug
