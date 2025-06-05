@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🤣 Infinite Jokes</title>
+  <style>
+    body {
+      background: #121212;
+      color: #bb86fc;
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+    #jokesContainer {
+      width: 600px;
+      max-width: 90vw;
+      background: #1e1e2f;
+      border-radius: 10px;
+      padding: 1rem;
+      box-shadow: 0 0 15px #7f00ff;
+      overflow-y: auto;
+      max-height: 70vh;
+    }
+    .joke {
+      background: #292941;
+      margin: 0.5rem 0;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #a64dff80;
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.75rem 1.5rem;
+      background: #7f00ff;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #a64dff;
+    }
+  </style>
+</head>
+<body>
+  <h1>🤣 Infinite Programming Jokes</h1>
+  <div id="jokesContainer">
+    <!-- Jokes will appear here -->
+  </div>
+  <button id="loadMoreBtn">Load More Jokes</button>
+
+  <script>
+    const jokesContainer = document.getElementById("jokesContainer");
+    const loadMoreBtn = document.getElementById("loadMoreBtn");
+
+    async function fetchJoke() {
+      try {
+        const res = await fetch("/api/joke");
+        const data = await res.json();
+        if (data.error) {
+          alert("Error: " + data.error);
+          return;
+        }
+        const jokeDiv = document.createElement("div");
+        jokeDiv.className = "joke";
+        jokeDiv.textContent = data.joke;
+        jokesContainer.appendChild(jokeDiv);
+        jokesContainer.scrollTop = jokesContainer.scrollHeight;
+      } catch (err) {
+        alert("Failed to fetch joke: " + err.message);
+      }
+    }
+
+    loadMoreBtn.onclick = () => {
+      fetchJoke();
+    };
+
+    // Auto-load first 3 jokes on page load
+    window.onload = () => {
+      fetchJoke();
+      fetchJoke();
+      fetchJoke();
+    };
+  </script>
+</body>
+</html>

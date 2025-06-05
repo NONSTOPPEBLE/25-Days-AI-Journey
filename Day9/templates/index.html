@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Assistant</title>
+  <style>
+    /* ─── Reset & Base ───────────────────────────────────────────────────────────── */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #ddd;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ─── Header ───────────────────────────────────────────────────────────────── */
+    header {
+      background-color: #1a1a2e;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #7f00ff;
+      box-shadow: 0 0 12px #7f00ffaa;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header h1 {
+      color: #bb86fc;
+      font-size: 1.8rem;
+      user-select: none;
+    }
+
+    nav a {
+      color: #90caf9;
+      margin-left: 1.5rem;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.2s ease;
+      user-select: none;
+      font-size: 1rem;
+    }
+
+    nav a.active,
+    nav a:hover {
+      color: #fff;
+      text-shadow: 0 0 8px #a64dff;
+    }
+
+    /* ─── Container ────────────────────────────────────────────────────────────── */
+    .container {
+      max-width: 900px;
+      width: 95%;
+      margin: 2rem auto 3rem;
+      background-color: #1e1e2f;
+      border-radius: 12px;
+      box-shadow: 0 0 40px rgba(127, 0, 255, 0.6);
+      padding: 1rem 1.5rem 2rem;
+      min-height: 600px;
+      display: none;
+      flex-direction: column;
+    }
+
+    .container.active {
+      display: flex;
+    }
+
+    /* ─── Chat UI ─────────────────────────────────────────────────────────────── */
+    #chatBox {
+      flex-grow: 1;
+      background: #292941;
+      padding: 1rem;
+      overflow-y: auto;
+      border-radius: 10px;
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+      box-shadow: inset 0 0 8px #7f00ff88;
+    }
+
+    .msg {
+      margin-bottom: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      max-width: 75%;
+      word-wrap: break-word;
+      user-select: text;
+    }
+
+    .user {
+      background-color: #3a3a5f;
+      color: #90caf9;
+      margin-left: auto;
+      box-shadow: 0 0 10px rgba(144, 202, 249, 0.6);
+    }
+
+    .bot {
+      background-color: #3f3f50;
+      color: #a5d6a7;
+      margin-right: auto;
+      box-shadow: 0 0 10px rgba(165, 214, 167, 0.6);
+    }
+
+    .input-container {
+      display: flex;
+      background-color: #2a2a3f;
+      padding: 1rem;
+      border-radius: 10px;
+      align-items: center;
+    }
+
+    #inputBox {
+      flex-grow: 1;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      background-color: #3a3a5f;
+      color: #ddd;
+      outline: none;
+    }
+
+    #inputBox::placeholder {
+      color: #aaa;
+    }
+
+    #sendBtn {
+      margin-left: 1rem;
+      padding: 0.75rem 1.5rem;
+      background-color: #7f00ff;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      font-size: 1rem;
+      position: relative;
+    }
+
+    #sendBtn:hover {
+      background-color: #a64dff;
+    }
+
+    #sendBtn:disabled {
+      background-color: #5a0080;
+      cursor: default;
+    }
+
+    #sendBtn.loading::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: 1rem;
+      width: 18px;
+      height: 18px;
+      margin-top: -9px;
+      border: 2px solid #fff;
+      border-top: 2px solid transparent;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ─── Settings UI ─────────────────────────────────────────────────────────── */
+    .settings-container {
+      margin-top: 1rem;
+      max-width: 500px;
+      align-self: center;
+      width: 100%;
+    }
+
+    .settings-container h2 {
+      color: #bb86fc;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      user-select: none;
+    }
+
+    .settings-container label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #ddd;
+    }
+
+    .settings-container input[type="text"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      background-color: #3a3a5f;
+      color: #ddd;
+      outline: none;
+      margin-bottom: 1.25rem;
+    }
+
+    .settings-container input[type="text"]::placeholder {
+      color: #aaa;
+    }
+
+    .settings-container button {
+      width: 100%;
+      background-color: #7f00ff;
+      color: #fff;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      user-select: none;
+    }
+
+    .settings-container button:hover {
+      background-color: #a64dff;
+    }
+
+    .settings-note {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #bbb;
+      background-color: #24243a;
+      padding: 1rem;
+      border-radius: 6px;
+      line-height: 1.4;
+      user-select: none;
+    }
+
+    /* ─── Joke UI ─────────────────────────────────────────────────────────────── */
+    .joke-container {
+      margin-top: 1rem;
+      max-width: 600px;
+      align-self: center;
+      width: 100%;
+      background: #292941;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 0 20px #7f00ffaa;
+      font-size: 1.1rem;
+      user-select: text;
+      min-height: 150px;
+      white-space: pre-wrap;
+    }
+
+    .joke-header {
+      color: #bb86fc;
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      user-select: none;
+      text-align: center;
+    }
+
+    /* ─── Responsive ───────────────────────────────────────────────────────────── */
+    @media screen and (max-width: 768px) {
+      header {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      nav a {
+        margin-left: 0.5rem;
+        font-size: 0.9rem;
+      }
+
+      .container {
+        width: 98%;
+        margin: 1rem auto 2rem;
+        min-height: 500px;
+      }
+
+      #chatBox {
+        height: 350px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>👨‍💻 Smart Assistant</h1>
+    <nav>
+      <a href="#" id="nav-chat" class="active">Chat</a>
+      <a href="#" id="nav-settings">Settings</a>
+      <a href="#" id="nav-joke">Joke</a>
+    </nav>
+  </header>
+
+  <!-- Chat Container -->
+  <section class="container active" id="chat-container" aria-label="Chat interface">
+    <div id="chatBox" aria-live="polite" role="log" aria-relevant="additions"></div>
+    <div class="input-container">
+      <input id="inputBox" type="text" placeholder="Ask me anything..." aria-label="Chat input" autocomplete="off" />
+      <button id="sendBtn" aria-label="Send message">Send</button>
+    </div>
+  </section>
+
+  <!-- Settings Container -->
+  <section class="container" id="settings-container" aria-label="Settings">
+    <div class="settings-container">
+      <h2>Settings</h2>
+      <label for="apiKeyInput">Enter Your OpenAI API Key</label>
+      <input type="text" id="apiKeyInput" placeholder="sk-..." autocomplete="off" aria-describedby="apiKeyHelp" />
+      <button id="saveApiKeyBtn">Save API Key</button>
+      <div id="apiKeyMessage" class="settings-note" role="alert" aria-live="polite" style="display:none;"></div>
+      <div class="settings-note" id="apiKeyHelp">
+        Your key is saved securely in your browser. You can update it anytime.
+      </div>
+    </div>
+  </section>
+
+  <!-- Joke Container -->
+  <section class="container" id="joke-container" aria-label="Joke generator">
+    <div class="joke-header">🤣 Random Joke Terminal</div>
+    <div class="joke-container" id="jokeBox">> Generating joke...</div>
+    <button id="newJokeBtn" style="margin-top:1rem; align-self:center; background:#7f00ff; border:none; color:#fff; padding:0.5rem 1.2rem; border-radius:8px; cursor:pointer; font-weight:600; user-select:none;">
+      Generate New Joke
+    </button>
+  </section>
+
+  <script>
+    // Navigation & Container toggle
+    const navChat = document.getElementById('nav-chat');
+    const navSettings = document.getElementById('nav-settings');
+    const navJoke = document.getElementById('nav-joke');
+
+    const chatContainer = document.getElementById('chat-container');
+    const settingsContainer = document.getElementById('settings-container');
+    const jokeContainer = document.getElementById('joke-container');
+
+    function setActiveNav(nav) {
+      [navChat, navSettings, navJoke].forEach(a => a.classList.remove('active'));
+      nav.classList.add('active');
+    }
+
+    function showContainer(container) {
+      [chatContainer, settingsContainer, jokeContainer].forEach(c => c.classList.remove('active'));
+      container.classList.add('active');
+    }
+
+    navChat.addEventListener('click', e => {
+      e.preventDefault();
+      setActiveNav(navChat);
+      showContainer(chatContainer);
+    });
+
+    navSettings.addEventListener('click', e => {
+      e.preventDefault();
+      setActiveNav(navSettings);
+      showContainer(settingsContainer);
+    });
+
+    navJoke.addEventListener('click', e => {
+      e.preventDefault();
+      setActiveNav(navJoke);
+      showContainer(jokeContainer);
+      generateJoke();
+    });
+
+    // -------- Chat UI --------
+    const chatBox = document.getElementById('chatBox');
+    const inputBox = document.getElementById('inputBox');
+    const sendBtn = document.getElementById('sendBtn');
+
+    function appendMessage(sender, text) {
+      const div = document.createElement('div');
+      div.className = sender.toLowerCase() === 'you' ? 'msg user' : 'msg bot';
+      div.innerHTML = `<strong>${sender}:</strong> ${text}`;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const message = inputBox.value.trim();
+      if (!message) return;
+
+      appendMessage('You', message);
+      inputBox.value = '';
+      sendBtn.disabled = true;
+      sendBtn.classList.add('loading');
+
+      // Get API key from localStorage
+      const apiKey = localStorage.getItem('openai_api_key');
+      if (!apiKey) {
+        appendMessage('Bot', '⚠️ Please set your OpenAI API key in Settings first.');
+        sendBtn.disabled = false;
+        sendBtn.classList.remove('loading');
+        return;
+      }
+
+      try {
+        const res = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message, api_key: apiKey }),
+        });
+
+        if (!res.ok) throw new Error('Network response was not OK');
+
+        const data = await res.json();
+        appendMessage('Bot', data.reply);
+      } catch (err) {
+        appendMessage('Bot', '❌ Server or network error.');
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.classList.remove('loading');
+      }
+    }
+
+    sendBtn.onclick = sendMessage;
+    inputBox.onkeydown = e => {
+      if (e.key === 'Enter') sendMessage();
+    };
+
+    // -------- Settings UI --------
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
+    const apiKeyMessage = document.getElementById('apiKeyMessage');
+
+    // Load saved key on page load
+    window.addEventListener('load', () => {
+      const savedKey = localStorage.getItem('openai_api_key');
+      if (savedKey) apiKeyInput.value = savedKey;
+
+      // Also initialize joke if joke tab is active on load
+      if (jokeContainer.classList.contains('active')) generateJoke();
+    });
+
+    saveApiKeyBtn.addEventListener('click', () => {
+      const key = apiKeyInput.value.trim();
+      if (!key.startsWith('sk-')) {
+        apiKeyMessage.textContent = 'Invalid API key format. Must start with "sk-".';
+        apiKeyMessage.style.color = '#ff5555';
+        apiKeyMessage.style.display = 'block';
+        return;
+      }
+      localStorage.setItem('openai_api_key', key);
+      apiKeyMessage.textContent = 'API key saved successfully!';
+      apiKeyMessage.style.color = '#a5d6a7';
+      apiKeyMessage.style.display = 'block';
+    });
+
+    // -------- Joke UI --------
+    const jokeBox = document.getElementById('jokeBox');
+    const newJokeBtn = document.getElementById('newJokeBtn');
+
+    const jokes = [
+      "Why do programmers hate nature? It has too many bugs.",
+      "Why do Java developers wear glasses? Because they can't C#.",
+      "I told my computer I needed a break... it said 'No problem, I’ll go to sleep.'",
+      "What's a computer’s favorite snack? Microchips!",
+      "404 joke not found.",
+      "There are 10 types of people in the world: those who understand binary and those who don't.",
+      "Debugging: Being the detective in a crime movie where you are also the murderer."
+    ];
+
+    function generateJoke() {
+      const joke = jokes[Math.floor(Math.random() * jokes.length)];
+      jokeBox.textContent = `> ${joke}`;
+    }
+
+    newJokeBtn.addEventListener('click', generateJoke);
+  </script>
+</body>
+</html>

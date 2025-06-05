@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Smart Assistant{% endblock %}</title>
+  <!-- Link to the shared CSS file -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <div class="container big-container">
+    <header>
+      <h1>Smart Assistant 🤖</h1>
+      <h5>Your AI Companion</h5>
+      <nav>
+        <a href="{{ url_for('home') }}">Chat</a> |
+        <a href="{{ url_for('settings') }}">Settings</a>
+      </nav>
+    </header>
+
+    <main>
+      {% block content %}
+      <!-- Child templates will inject here -->
+      {% endblock %}
+    </main>
+  </div>
+
+  <!-- Shared JavaScript -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

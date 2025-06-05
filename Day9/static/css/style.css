@@ -1,0 +1,271 @@
+/* ─── Reset & Base ───────────────────────────────────────────────────────────── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #121212;
+  color: #ddd;
+  line-height: 1.6;
+}
+
+/* ─── Big Container ─────────────────────────────────────────────────────────── */
+.container.big-container {
+  max-width: 1000px;
+  width: 95%;
+  margin: 2rem auto;
+  background-color: #1e1e2f;
+  border-radius: 12px;
+  box-shadow: 0 0 30px rgba(127, 0, 255, 0.4);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  max-width: 700px;
+  width: 95%;
+  margin: 2rem auto;
+}
+
+/* ─── Header ───────────────────────────────────────────────────────────────── */
+header {
+  background-color: #2a2a3f;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  border-bottom: 2px solid #3f3f60;
+}
+
+header h1 {
+  color: #bb86fc;
+  font-size: 2.2rem;
+  margin-bottom: 0.4rem;
+}
+
+header h5 {
+  color: #aaa;
+  font-size: 1rem;
+  font-weight: normal;
+  margin-bottom: 1rem;
+}
+
+header nav {
+  margin-top: 0.5rem;
+}
+
+header nav a {
+  color: #90caf9;
+  margin: 0 1rem;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+header nav a:hover {
+  color: #fff;
+}
+
+/* ─── Main Area ────────────────────────────────────────────────────────────── */
+main {
+  padding: 2rem 1rem;
+}
+
+/* ─── Chat Box ──────────────────────────────────────────────────────────────── */
+#chatBox {
+  height: 500px;
+  background: #292941;
+  padding: 1rem;
+  overflow-y: auto;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Individual message bubbles */
+.msg {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  max-width: 75%;
+  word-wrap: break-word;
+}
+
+/* User messages */
+.user {
+  background-color: #3a3a5f;
+  color: #90caf9;
+  margin-left: auto;
+  box-shadow: 0 0 10px rgba(144, 202, 249, 0.4);
+}
+
+/* Bot messages */
+.bot {
+  background-color: #3f3f50;
+  color: #a5d6a7;
+  margin-right: auto;
+  box-shadow: 0 0 10px rgba(165, 214, 167, 0.4);
+}
+
+/* ─── Input Section ────────────────────────────────────────────────────────── */
+.input-container {
+  display: flex;
+  margin-top: 1rem;
+  background-color: #2a2a3f;
+  padding: 1rem;
+  border-radius: 10px;
+  align-items: center;
+}
+
+#inputBox {
+  flex-grow: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #3a3a5f;
+  color: #ddd;
+  outline: none;
+}
+
+#inputBox::placeholder {
+  color: #aaa;
+}
+
+#sendBtn {
+  margin-left: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #7f00ff;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  position: relative;
+  font-size: 1rem;
+}
+
+#sendBtn:hover {
+  background-color: #a64dff;
+}
+
+/* Spinner on Send button */
+#sendBtn.loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  border: 2px solid #fff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Settings Page ────────────────────────────────────────────────────────── */
+.settings-container {
+  background-color: #292941;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 600px;
+  margin: 0 auto;
+  box-shadow: 0 0 20px rgba(127, 0, 255, 0.2);
+}
+
+.settings-container h2 {
+  color: #bb86fc;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.settings-container form {
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-container label {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #ddd;
+}
+
+.settings-container input[type="text"] {
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #3a3a5f;
+  color: #ddd;
+  margin-bottom: 1rem;
+  outline: none;
+}
+
+.settings-container input[type="text"]::placeholder {
+  color: #aaa;
+}
+
+.settings-container button[type="submit"] {
+  background-color: #7f00ff;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  align-self: flex-end;
+}
+
+.settings-container button[type="submit"]:hover {
+  background-color: #a64dff;
+}
+
+.settings-container .note {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: #bbb;
+  background-color: #24243a;
+  padding: 1rem;
+  border-radius: 6px;
+  line-height: 1.5;
+}
+
+/* ─── Responsive ───────────────────────────────────────────────────────────── */
+@media screen and (max-width: 768px) {
+  header h1 {
+    font-size: 1.8rem;
+  }
+
+  header h5 {
+    font-size: 0.9rem;
+  }
+
+  #chatBox {
+    height: 400px;
+  }
+
+  .settings-container {
+    padding: 1rem;
+  }
+
+  #inputBox {
+    font-size: 0.95rem;
+  }
+
+  #sendBtn {
+    padding: 0.65rem 1rem;
+    font-size: 0.95rem;
+  }
+}
