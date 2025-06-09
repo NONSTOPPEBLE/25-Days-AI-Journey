@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Weather UI</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Apply Inter font to the whole body */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #181818 0%, #000000 100%); /* Deep dark gradient background */
+            overflow: hidden; /* Prevent scrollbars */
+            color: #e0e0e0; /* Default text color */
+        }
+
+        /* Main circular UI container - ultimate refinement */
+        .circular-container {
+            width: 95vmin; /* Very responsive */
+            max-width: 700px; /* Max size for larger screens */
+            aspect-ratio: 1 / 1; /* Perfectly circular */
+            border-radius: 50%;
+            background-color: #111; /* Ultra dark outer background */
+            box-shadow:
+                0 40px 80px -20px rgba(0, 0, 0, 0.95), /* Even deeper shadow for immense depth */
+                inset 0 0 50px rgba(255, 255, 255, 0.02), /* Subtle inner highlight */
+                inset 0 0 20px rgba(0, 0, 0, 0.9); /* Stronger inner shadow */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4%; /* Increased inner spacing */
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.05); /* Very subtle border */
+            flex-direction: column; /* Allow stacking header and inner frame */
+        }
+
+        /* Project Header Section */
+        .project-header-section {
+            position: absolute;
+            top: 5%; /* Position near the top edge of the circular container */
+            width: 80%; /* Adjust width to fit well */
+            text-align: center;
+            color: #f0f0f0;
+            z-index: 10; /* Ensure it's on top */
+            pointer-events: none; /* Allow clicks to pass through */
+        }
+
+        .project-header-section h1 {
+            font-size: 1.8rem; /* Larger font for main header */
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+        }
+
+        .project-header-section p {
+            font-size: 0.9rem;
+            font-weight: 300; /* Lighter weight for subtitle */
+            letter-spacing: 0.05em;
+            color: #b0b0b0;
+        }
+
+
+        /* Inner circular frame */
+        .inner-frame {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: #0c0c0c; /* Black inner background */
+            box-shadow:
+                inset 0 10px 25px rgba(0, 0, 0, 0.95), /* Ultra deep inner shadow */
+                inset 0 -10px 25px rgba(255, 255, 255, 0.01); /* Minimal inner highlight */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 7%; /* Increased padding inside the inner frame */
+            margin-top: 15%; /* Push down to make space for project header */
+        }
+
+        /* Animation Display Area - Larger Parabola Shape */
+        #animation-display {
+            width: 96%; /* Even wider within its parent */
+            height: 68%; /* Even taller within its parent */
+            border-top-left-radius: 75% 150%; /* More pronounced parabolic curve */
+            border-top-right-radius: 75% 150%;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            overflow: hidden;
+            position: relative;
+            background-color: #101520; /* Deep blue/grey base sky color */
+            box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.9); /* Deeper inner shadow for display */
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 255, 255, 0.03); /* Subtle border for definition */
+        }
+
+        /* Mountain layers */
+        .mountain-layer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 100%; /* Height is relative to display area */
+            background-repeat: repeat-x;
+            pointer-events: none;
+            image-rendering: optimizeSpeed; /* Optimize for smooth animation */
+        }
+
+        /* NEW: More Mountain SVG Data URLs and Animations */
+        /* Each layer uses a slightly different fill color and speed for depth */
+        #mountain-layer-deep-back {
+            height: 60%;
+            z-index: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 600'%3E%3Cpath fill='%232a3547' d='M0 600L150 400L300 550L450 300L600 450L750 200L900 350L1000 600Z'/%3E%3C/svg%3E");
+            background-size: 550px 100%;
+            animation: parallax-deep-back 70s linear infinite;
+        }
+
+        #mountain-layer-back {
+            height: 70%;
+            z-index: 1;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 700'%3E%3Cpath fill='%23263140' d='M0 700L100 450L200 600L300 350L400 550L500 300L600 500L700 250L800 400L900 650L1000 300L1000 700Z'/%3E%3C/svg%3E");
+            background-size: 500px 100%;
+            animation: parallax-back 60s linear infinite;
+        }
+
+        #mountain-layer-middle {
+            height: 80%;
+            z-index: 2; /* Adjusted Z-index */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 800'%3E%3Cpath fill='%23202936' d='M0 800L150 550L300 700L450 400L600 650L750 300L900 500L1000 800Z'/%3E%3C/svg%3E");
+            background-size: 600px 100%;
+            animation: parallax-middle 40s linear infinite;
+        }
+
+        #mountain-layer-middle-front { /* NEW Layer */
+            height: 87%;
+            z-index: 3;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 870'%3E%3Cpath fill='%231a202c' d='M0 870L120 580L240 730L360 480L480 680L600 380L720 580L840 280L960 480L1000 870Z'/%3E%3C/svg%3E");
+            background-size: 650px 100%;
+            animation: parallax-middle-front 35s linear infinite;
+        }
+
+        #mountain-layer-front {
+            height: 95%; /* Even closer */
+            z-index: 5; /* In front of celestial body, behind clouds/weather */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 950'%3E%3Cpath fill='%23141822' d='M0 950L100 600L200 750L300 450L400 600L500 350L600 500L700 200L800 350L900 500L1000 950Z'/%3E%3C/svg%3E");
+            background-size: 700px 100%;
+            animation: parallax-front 30s linear infinite;
+        }
+
+        /* NEW: Parallax animation keyframes for new layers */
+        @keyframes parallax-deep-back {
+            0% { background-position-x: 0; }
+            100% { background-position-x: -550px; }
+        }
+        @keyframes parallax-middle-front {
+            0% { background-position-x: 0; }
+            100% { background-position-x: -650px; }
+        }
+        /* Existing parallax keyframes unchanged, but now more layers use them */
+        @keyframes parallax-back {
+            0% { background-position-x: 0; }
+            100% { background-position-x: -500px; }
+        }
+        @keyframes parallax-middle {
+            0% { background-position-x: 0; }
+            100% { background-position-x: -600px; }
+        }
+        @keyframes parallax-front {
+            0% { background-position-x: 0; }
+            100% { background-position-x: -700px; }
+        }
+
+
+        /* Sky overlay for animations - sits on top of mountains */
+        .sky-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: transparent; /* Initial transparent */
+            z-index: 4; /* Above most mountains, below front-most mountains and celestial body */
+            transition: background-color 2s ease-in-out; /* Smooth sky color transitions */
+            /* Inherit radii for parabolic shape */
+            border-top-left-radius: inherit;
+            border-top-right-radius: inherit;
+            border-bottom-left-radius: inherit;
+            border-bottom-right-radius: inherit;
+        }
+
+        /* Sun/Moon element */
+        #celestial-body {
+            position: absolute;
+            width: 100px; /* Default size for sun */
+            height: 100px;
+            border-radius: 50%;
+            bottom: -150px; /* Start below the visible area */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 6; /* Above sky and all mountains, below clouds and precipitation */
+            transition: all 3s ease-out; /* Smooth movement, size, and color change */
+            background-color: #FFD700; /* Gold */
+            box-shadow: 0 0 30px 15px rgba(255, 215, 0, 0.7); /* Sun glow */
+        }
+
+        /* Weather elements container (rain/snow) */
+        #weather-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 8; /* Highest z-index for precipitation */
+            /* Inherit radii for parabolic shape */
+            border-top-left-radius: inherit;
+            border-top-right-radius: inherit;
+            border-bottom-left-radius: inherit;
+            border-bottom-right-radius: inherit;
+            pointer-events: none;
+        }
+
+        /* Raindrop animation */
+        @keyframes fall {
+            0% { transform: translateY(-100%); opacity: 0; }
+            5% { opacity: 1; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+
+        .raindrop {
+            position: absolute;
+            background-color: rgba(100, 149, 237, 0.7); /* Cornflower blue with transparency */
+            width: 2px;
+            height: 18px;
+            border-radius: 1px;
+            animation: fall 1s linear infinite;
+            pointer-events: none;
+        }
+
+        /* Snowflake animation */
+        @keyframes snowflake-fall {
+            0% { transform: translateY(-100%); opacity: 0; }
+            5% { opacity: 1; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+        @keyframes snowflake-sway {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(25px); }
+        }
+
+        .snowflake {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.95); /* Even more opaque */
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: snowflake-fall var(--duration) linear var(--delay) infinite, snowflake-sway var(--sway-duration) ease-in-out infinite alternate;
+            pointer-events: none;
+            filter: blur(0.5px); /* Soften edges */
+        }
+
+        /* Cloud styling */
+        #cloud-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 7; /* Above celestial body, below precipitation */
+            /* Inherit radii for parabolic shape */
+            border-top-left-radius: inherit;
+            border-top-right-radius: inherit;
+            border-bottom-left-radius: inherit;
+            border-bottom-right-radius: inherit;
+            pointer-events: none;
+        }
+
+        @keyframes cloud-move-left {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-150%); }
+        }
+        @keyframes cloud-move-right {
+            0% { transform: translateX(-150%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .cloud {
+            position: absolute;
+            background: #fff;
+            border-radius: 100px;
+            opacity: 0.8;
+            filter: blur(2px);
+            pointer-events: none;
+        }
+
+        .cloud:before, .cloud:after {
+            content: '';
+            position: absolute;
+            background: inherit;
+            border-radius: 100px;
+        }
+
+        /* Small cloud */
+        .cloud.small {
+            width: 80px;
+            height: 30px;
+        }
+        .cloud.small:before {
+            width: 40px; height: 40px; top: -15px; left: 10px;
+        }
+        .cloud.small:after {
+            width: 50px; height: 50px; top: -20px; left: 30px;
+        }
+
+        /* Medium cloud */
+        .cloud.medium {
+            width: 120px;
+            height: 45px;
+        }
+        .cloud.medium:before {
+            width: 60px; height: 60px; top: -20px; left: 20px;
+        }
+        .cloud.medium:after {
+            width: 70px; height: 70px; top: -25px; left: 40px;
+        }
+
+        /* Large cloud */
+        .cloud.large {
+            width: 180px;
+            height: 60px;
+        }
+        .cloud.large:before {
+            width: 80px; height: 80px; top: -25px; left: 30px;
+        }
+        .cloud.large:after {
+            width: 90px; height: 90px; top: -30px; left: 60px;
+        }
+
+        /* Control Panel Area */
+        .control-panel {
+            width: 100%;
+            height: 35%;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            margin-top: 4%; /* More space for a cleaner look */
+            flex-shrink: 0;
+        }
+
+        /* Left controls: Power and 3 square buttons */
+        .left-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem; /* Even more space between buttons */
+            align-items: center;
+        }
+
+        /* General square button styles */
+        .square-btn {
+            width: 60px; /* Larger buttons */
+            height: 60px;
+            background: linear-gradient(145deg, #222 0%, #333 100%); /* Subtle gradient for depth */
+            border-radius: 1rem; /* More rounded corners */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow:
+                7px 7px 15px rgba(0, 0, 0, 0.7), /* Neumorphic shadow */
+                -7px -7px 15px rgba(50, 50, 50, 0.2), /* Light source for neumorphism */
+                inset 0 0 5px rgba(255, 255, 255, 0.05); /* Inner highlight */
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            border: none;
+            color: #d8d8d8; /* Lighter icon color */
+            font-size: 1.8rem; /* For +/- buttons */
+        }
+
+        .square-btn:hover {
+            background: linear-gradient(145deg, #333 0%, #222 100%); /* Inverted gradient on hover */
+            transform: translateY(-4px) scale(1.02); /* More pronounced lift and slight scale */
+            box-shadow:
+                10px 10px 20px rgba(0, 0, 0, 0.8),
+                -10px -10px 20px rgba(60, 60, 60, 0.3),
+                inset 0 0 7px rgba(255, 255, 255, 0.1);
+        }
+
+        .square-btn:active {
+            background: linear-gradient(145deg, #111 0%, #222 100%);
+            transform: translateY(1px); /* Push down */
+            box-shadow: inset 5px 5px 10px rgba(0, 0, 0, 0.8), inset -5px -5px 10px rgba(0, 0, 0, 0.2); /* Inset shadow for pressed look */
+        }
+
+        /* Power button specific style */
+        #power-btn {
+            border-radius: 50%; /* Make it round */
+        }
+
+        /* Central Dial and Weather Buttons Container */
+        .dial-container {
+            position: relative;
+            width: 240px; /* Even Larger dial */
+            height: 240px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* Outer dial ring */
+        .knob-outer {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: #1a1a1a;
+            box-shadow:
+                inset 0 8px 25px rgba(0, 0, 0, 0.9),
+                inset 0 -8px 25px rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Inner dial / knob */
+        .knob-inner {
+            width: 80%; /* Larger inner knob */
+            height: 80%;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #222 0%, #333 100%); /* Gradient matching buttons */
+            box-shadow:
+                0 15px 30px rgba(0, 0, 0, 0.8), /* More prominent shadow for 3D effect */
+                inset 5px 5px 10px rgba(0, 0, 0, 0.8), /* Inner dark shadow */
+                inset -5px -5px 10px rgba(255, 255, 255, 0.18); /* Stronger inner highlight */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            transition: all 0.2s ease-in-out;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+        }
+        .knob-inner:active {
+            cursor: grabbing;
+            transform: scale(0.98);
+            box-shadow: inset 5px 5px 10px rgba(0, 0, 0, 0.9), inset -5px -5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Knob indicator dot */
+        .knob-indicator {
+            width: 30px; /* Even Bigger indicator dot */
+            height: 30px;
+            background-color: #a0a0a0; /* Slightly brighter medium gray */
+            border-radius: 50%;
+            box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Weather button styling */
+        .weather-btn {
+            position: absolute;
+            width: 70px; /* Larger buttons */
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #222 0%, #333 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow:
+                7px 7px 15px rgba(0, 0, 0, 0.7),
+                -7px -7px 15px rgba(50, 50, 50, 0.2),
+                inset 0 0 5px rgba(255, 255, 255, 0.05);
+            transition: all 0.2s ease-in-out;
+            font-size: 2.5rem; /* Larger emoji size */
+            cursor: pointer;
+            border: none;
+            color: #d8d8d8;
+            transform: translate(-50%, -50%);
+        }
+
+        .weather-btn:hover {
+            background: linear-gradient(145deg, #333 0%, #222 100%);
+            transform: translate(-50%, -50%) scale(1.08); /* More prominent hover */
+            box-shadow:
+                10px 10px 20px rgba(0, 0, 0, 0.8),
+                -10px -10px 20px rgba(60, 60, 60, 0.3),
+                inset 0 0 7px rgba(255, 255, 255, 0.1);
+        }
+
+        .weather-btn:active {
+            background: linear-gradient(145deg, #111 0%, #222 100%);
+            transform: translate(-50%, -50%) scale(0.96);
+            box-shadow: inset 5px 5px 10px rgba(0, 0, 0, 0.8), inset -5px -5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Precise positioning for weather buttons around the dial */
+        /* These are relative to dial-container */
+        #sunrise-btn { top: 25%; left: 19%; }
+        #partly-cloudy-btn { top: 12%; left: 50%; }
+        #cloudy-btn { top: 25%; left: 81%; }
+        #rain-btn { top: 75%; left: 81%; }
+        #snow-btn { top: 75%; left: 19%; }
+
+        /* Right controls: Temperature display and +/- buttons */
+        .right-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 1rem;
+            margin-right: 2rem; /* More spacing */
+        }
+
+        .temperature-display {
+            font-size: 3rem; /* Very large temperature text */
+            font-weight: 700; /* Bold */
+            color: #fafafa; /* Near white */
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.1); /* Subtle glow */
+        }
+
+        .temp-label {
+            font-size: 1.1rem; /* Slightly larger label */
+            color: #a0a0a0; /* Medium gray label */
+            text-transform: uppercase;
+            letter-spacing: 0.1em; /* More spacing */
+            font-weight: 500; /* Medium weight */
+        }
+
+        .temp-buttons {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        /* SVG icon sizing */
+        .icon-btn svg {
+            width: 32px; /* Larger icons */
+            height: 32px;
+            color: #d8d8d8;
+        }
+
+        /* Header Styling */
+        .control-header {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #b0b0b0;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.5rem; /* Space below header */
+            align-self: flex-start; /* Align header to the start of its flex container */
+            width: 100%; /* Ensure it spans the width */
+            text-align: center; /* Center text */
+            padding-bottom: 0.5rem; /* Padding for separation */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Subtle separator */
+        }
+
+        .left-controls .control-header,
+        .right-controls .control-header {
+            margin-left: auto; /* Push to right for right-aligned items */
+            margin-right: auto; /* Push to left for left-aligned items */
+            text-align: center;
+        }
+
+
+        /* Name Overlay */
+        #name-overlay {
+            position: absolute;
+            top: 50%; /* Center vertically */
+            left: 50%; /* Center horizontally */
+            transform: translate(-50%, -50%); /* Adjust for perfect centering */
+            font-size: 2.5rem; /* Large font size */
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.05); /* Very subtle transparent white */
+            pointer-events: none; /* Allows clicks/interactions to pass through */
+            z-index: 9; /* Above all other layers */
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.02); /* Very subtle glow */
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen">
+
+    <!-- Main circular UI container -->
+    <div class="circular-container">
+        <!-- Project Header Section -->
+        <div class="project-header-section">
+            <h1>Day 12 Project</h1>
+            <p>Dynamic Weather Visualizer</p>
+        </div>
+
+        <!-- Inner circular frame -->
+        <div class="inner-frame">
+
+            <!-- Animation Display Area -->
+            <div id="animation-display">
+                <!-- Many Animated Mountain Layers -->
+                <div id="mountain-layer-deep-back" class="mountain-layer"></div>
+                <div id="mountain-layer-back" class="mountain-layer"></div>
+                <div id="mountain-layer-middle" class="mountain-layer"></div>
+                <div id="mountain-layer-middle-front" class="mountain-layer"></div>
+
+                <div id="sky-overlay"></div>
+                <!-- Sun/Moon element -->
+                <div id="celestial-body"></div>
+
+                <div id="mountain-layer-front" class="mountain-layer"></div> <!-- Front layer in front of celestial body -->
+
+                <div id="cloud-elements"></div> <!-- Container for clouds -->
+                <div id="weather-elements"></div> <!-- Container for rain/snow -->
+
+                <!-- Name Overlay -->
+                <div id="name-overlay">VATSAL GAVIT</div>
+            </div>
+
+            <!-- Control Panel Area -->
+            <div class="control-panel">
+                <!-- Left controls: Power and 3 square buttons -->
+                <div class="left-controls">
+                    <div class="control-header">Controls</div>
+                    <button id="power-btn" class="square-btn icon-btn">
+                        <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zm4.356 1.636a1 1 0 10-1.412-1.412l-.708.708a1 1 0 001.412 1.412l.708-.708zM17 8a1 1 0 100 2h1a1 1 0 100-2h-1zm-1.636 4.356a1 1 0 10-1.412 1.412l.708.708a1 1 0 101.412-1.412l-.708-.708zM11 17a1 1 0 10-2 0v1a1 1 0 102 0v-1zm-4.356-1.636a1 1 0 101.412 1.412l-.708.708a1 1 0 10-1.412-1.412l.708-.708zM3 10a1 1 0 100-2H2a1 1 0 100 2h1zm1.636-4.356a1 1 0 101.412-1.412l-.708-.708a1 1 0 00-1.412 1.412l.708.708z" clip-rule="evenodd"></path></svg>
+                    </button>
+                    <button class="square-btn icon-btn">
+                        <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM11 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2h-2zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2z"></path></svg>
+                    </button>
+                    <button class="square-btn icon-btn">
+                        <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+
+                <!-- Central Dial and Weather Buttons -->
+                <div class="dial-container">
+                    <!-- Outer dial -->
+                    <div class="knob-outer">
+                        <!-- Inner dial / knob -->
+                        <div class="knob-inner">
+                            <!-- Knob indicator dot -->
+                            <div class="knob-indicator"></div>
+                        </div>
+                    </div>
+                    <!-- Weather Buttons - positioned absolutely over the dial-container -->
+                    <button id="sunrise-btn" class="weather-btn">☀️</button>
+                    <button id="partly-cloudy-btn" class="weather-btn">🌤️</button>
+                    <button id="cloudy-btn" class="weather-btn">☁️</button>
+                    <button id="rain-btn" class="weather-btn">🌧️</button>
+                    <button id="snow-btn" class="weather-btn">❄️</button>
+                </div>
+
+                <!-- Right controls: Temperature display and +/- buttons -->
+                <div class="right-controls">
+                    <div class="control-header">Settings</div>
+                    <span class="temp-label">TEMPERATURE</span>
+                    <div class="temperature-display">27°F</div>
+                    <div class="temp-buttons">
+                        <button class="square-btn temp-btn">-</button>
+                        <button class="square-btn temp-btn">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const animationDisplay = document.getElementById('animation-display');
+        const skyOverlay = document.getElementById('sky-overlay');
+        const celestialBody = document.getElementById('celestial-body');
+        const weatherElementsContainer = document.getElementById('weather-elements');
+        const cloudElementsContainer = document.getElementById('cloud-elements');
+
+        const sunriseBtn = document.getElementById('sunrise-btn');
+        const partlyCloudyBtn = document.getElementById('partly-cloudy-btn');
+        const cloudyBtn = document.getElementById('cloudy-btn');
+        const rainBtn = document.getElementById('rain-btn');
+        const snowBtn = document.getElementById('snow-btn');
+
+        // Function to clear existing weather effects
+        function clearWeatherEffects() {
+            weatherElementsContainer.innerHTML = ''; // Remove all raindrops/snowflakes
+            cloudElementsContainer.innerHTML = ''; // Remove all clouds
+            celestialBody.style.bottom = '-150px'; // Move celestial body completely out of view
+            skyOverlay.style.backgroundColor = 'transparent'; // Reset sky overlay
+
+            // Reset celestial body to sun default appearance and size
+            celestialBody.style.width = '100px';
+            celestialBody.style.height = '100px';
+            celestialBody.style.backgroundColor = '#FFD700'; // Gold
+            celestialBody.style.boxShadow = '0 0 30px 15px rgba(255, 215, 0, 0.7)'; // Sun glow
+
+            // Reset transitions for immediate hide/reset
+            celestialBody.style.transition = 'none';
+            skyOverlay.style.transition = 'none';
+
+            // Force reflow to ensure styles are applied before new transitions
+            void celestialBody.offsetWidth;
+            void skyOverlay.offsetWidth;
+        }
+
+        // Function to create a cloud element
+        function createCloud(type, left, top, animationDirection, duration, delay, opacity = 0.8) {
+            const cloud = document.createElement('div');
+            cloud.classList.add('cloud', type);
+            cloud.style.left = `${left}%`;
+            cloud.style.top = `${top}%`;
+            cloud.style.animation = `${animationDirection} ${duration}s linear ${delay}s infinite`;
+            cloud.style.opacity = opacity;
+            return cloud;
+        }
+
+        // --- Animation Functions ---
+
+        function animateSunrise() {
+            clearWeatherEffects();
+            // Allow transitions to apply
+            celestialBody.style.transition = 'all 3s ease-out';
+            skyOverlay.style.transition = 'background-color 3s ease-in-out';
+
+            // Change sky color from dark to morning glow
+            skyOverlay.style.backgroundColor = 'rgba(255, 165, 0, 0.4)'; /* Orange glow */
+            setTimeout(() => {
+                skyOverlay.style.backgroundColor = 'rgba(255, 200, 0, 0.2)'; /* Lighter yellow glow */
+            }, 1500);
+
+            // Set celestial body to sun appearance
+            celestialBody.style.width = '100px';
+            celestialBody.style.height = '100px';
+            celestialBody.style.backgroundColor = '#FFD700'; // Gold
+            celestialBody.style.boxShadow = '0 0 40px 20px rgba(255, 215, 0, 0.8)'; // Brighter glow
+
+            // Sun rise animation
+            celestialBody.style.bottom = '15%'; // Sun moves up into display
+
+            // After sun rises, transition to a clear, bright sky
+            setTimeout(() => {
+                skyOverlay.style.backgroundColor = 'rgba(135, 206, 235, 0.3)'; /* Light blue sky */
+                celestialBody.style.bottom = '20%'; /* Settle higher for full day */
+            }, 3000);
+        }
+
+        function animateRain() {
+            clearWeatherEffects();
+            celestialBody.style.transition = 'none'; // Ensure celestial body remains hidden
+            skyOverlay.style.transition = 'background-color 2s ease-in-out';
+
+            // Change sky color to dark, rainy clouds
+            skyOverlay.style.backgroundColor = 'rgba(60, 60, 60, 0.7)'; /* Dark gray, near black */
+
+            // Add dark clouds
+            const numRainClouds = 4;
+            for (let i = 0; i < numRainClouds; i++) {
+                const cloud = createCloud('large', 10 + i * 25, 10 + i * 5, 'cloud-move-right', 20 - i * 3, i * 2, 0.9);
+                cloud.style.backgroundColor = '#505050'; // Darker clouds for rain
+                cloudElementsContainer.appendChild(cloud);
+            }
+
+
+            // Create and animate raindrops
+            const numRaindrops = 150; // More raindrops for a denser effect
+            for (let i = 0; i < numRaindrops; i++) {
+                const raindrop = document.createElement('div');
+                raindrop.classList.add('raindrop');
+                raindrop.style.left = `${Math.random() * 100}%`; // Random horizontal position
+                raindrop.style.animationDelay = `${Math.random() * 1.5}s`; // Stagger animation start
+                raindrop.style.animationDuration = `${0.8 + Math.random() * 0.5}s`; // Vary speed
+                weatherElementsContainer.appendChild(raindrop);
+            }
+        }
+
+        function animateCloudy() {
+            clearWeatherEffects();
+            celestialBody.style.transition = 'all 2s ease-in-out';
+            skyOverlay.style.transition = 'background-color 2s ease-in-out';
+
+            // Change celestial body to moon appearance
+            celestialBody.style.width = '120px'; /* Moon size */
+            celestialBody.style.height = '120px';
+            celestialBody.style.backgroundColor = '#C0C0C0'; /* Silver */
+            celestialBody.style.boxShadow = '0 0 20px 10px rgba(192, 192, 192, 0.5)'; /* Moon glow */
+            celestialBody.style.bottom = '50%'; /* Move moon to the middle of the sky */
+
+
+            // Change sky color to dark, night clouds
+            skyOverlay.style.backgroundColor = 'rgba(25, 25, 50, 0.7)'; /* Very dark blue/purple */
+
+            // Add heavy, slow-moving clouds for night
+            const numClouds = 5;
+            for (let i = 0; i < numClouds; i++) {
+                const cloud = createCloud('large', -20 + i * 30, 10 + Math.random() * 20, 'cloud-move-right', 25 - i * 3, i * 3, 0.9);
+                cloud.style.backgroundColor = '#707070'; // Darker clouds for night
+                cloudElementsContainer.appendChild(cloud);
+            }
+        }
+
+        function animatePartlyCloudy() {
+            clearWeatherEffects();
+            celestialBody.style.transition = 'all 2s ease-out';
+            skyOverlay.style.transition = 'background-color 2s ease-in-out';
+
+            // Sky color for partly cloudy
+            skyOverlay.style.backgroundColor = 'rgba(135, 206, 235, 0.2)'; /* Light blue with transparency */
+            celestialBody.style.width = '100px';
+            celestialBody.style.height = '100px';
+            celestialBody.style.bottom = '20%'; // Sun visible in the sky
+            celestialBody.style.backgroundColor = '#FFD700'; // Sun color
+            celestialBody.style.boxShadow = '0 0 25px 12px rgba(255, 215, 0, 0.6)'; // Normal sun glow
+
+            // Add a few scattered white clouds
+            cloudElementsContainer.appendChild(createCloud('small', 70, 15, 'cloud-move-left', 15, 0, 0.7));
+            cloudElementsContainer.appendChild(createCloud('medium', -10, 30, 'cloud-move-right', 20, 5, 0.7));
+            cloudElementsContainer.appendChild(createCloud('small', 30, 5, 'cloud-move-left', 18, 2, 0.7));
+
+            document.querySelectorAll('.cloud').forEach(cloud => {
+                cloud.style.backgroundColor = '#FFFFFF'; /* White clouds */
+            });
+        }
+
+        function animateSnow() {
+            clearWeatherEffects();
+            celestialBody.style.transition = 'none';
+            skyOverlay.style.transition = 'background-color 2s ease-in-out';
+
+            // Change sky color to heavy snow clouds
+            skyOverlay.style.backgroundColor = 'rgba(80, 90, 100, 0.8)'; /* Dark cool grey */
+
+            // Add snow clouds
+            const numSnowClouds = 4;
+            for (let i = 0; i < numSnowClouds; i++) {
+                const cloud = createCloud('large', 0 + i * 25, 5 + i * 8, 'cloud-move-left', 22 - i * 3, i * 1.5, 0.9);
+                cloud.style.backgroundColor = '#606060'; // Darker clouds for snow
+                cloudElementsContainer.appendChild(cloud);
+            }
+
+            // Create and animate snowflakes
+            const numSnowflakes = 300; // Even more snowflakes for dense fall
+            for (let i = 0; i < numSnowflakes; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.classList.add('snowflake');
+                snowflake.style.left = `${Math.random() * 100}%`;
+                // Use CSS variables for animation properties to allow for more precise control
+                snowflake.style.setProperty('--delay', `${Math.random() * 4}s`);
+                snowflake.style.setProperty('--duration', `${3 + Math.random() * 2}s`);
+                snowflake.style.setProperty('--sway-duration', `${2 + Math.random() * 1}s`);
+
+                snowflake.style.opacity = `${0.5 + Math.random() * 0.5}`; // Vary opacity for depth
+                snowflake.style.transform = `scale(${0.4 + Math.random() * 0.6})`; // Vary size (smaller overall)
+                weatherElementsContainer.appendChild(snowflake);
+            }
+        }
+
+
+        // --- Event Listeners ---
+        sunriseBtn.addEventListener('click', animateSunrise);
+        rainBtn.addEventListener('click', animateRain);
+        cloudyBtn.addEventListener('click', animateCloudy);
+        partlyCloudyBtn.addEventListener('click', animatePartlyCloudy);
+        snowBtn.addEventListener('click', animateSnow);
+
+        // Initial state on load
+        window.onload = () => {
+            animatePartlyCloudy(); // Start with a default pleasant view
+        };
+
+    </script>
+</body>
+</html>
+
