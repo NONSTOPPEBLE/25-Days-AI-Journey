@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Real Solar System Explorer</title>
+    <!-- Include Tailwind CSS for utility classes to streamline styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter for a clean, modern typeface throughout the application -->
+    <link href="https://fonts.googleapis.com/css2?family="Inter":wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* --- Base Body Styles --- */
+        /* Sets up the fundamental visual and interactive properties for the entire page */
+        body {
+            font-family: 'Inter', sans-serif; /* Applies the Inter font */
+            margin: 0; /* Removes default body margin */
+            overflow: hidden; /* Prevents scrollbars, important for full-screen 3D scenes */
+            position: relative; /* Establishes a positioning context for absolute children */
+            height: 100vh; /* Full viewport height */
+            width: 100vw; /* Full viewport width */
+            cursor: grab; /* Default cursor for draggable areas */
+            background-color: #000000; /* Solid black background for space */
+            /* Using a radial gradient for subtle background depth, transitioning from dark purple-blue to very dark blue */
+            background-image: radial-gradient(circle at top left, #1a1a2e, #0f0f1c 75%);
+        }
+
+        /* Cursor style when dragging is active */
+        body.dragging {
+            cursor: grabbing;
+        }
+
+        /* --- Starfield Background Styling --- */
+        /* Creates a multi-layered, animated starfield using CSS pseudo-elements and box-shadows */
+        .star-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1; /* Ensures stars are rendered behind all other content */
+            overflow: hidden; /* Hides parts of stars that go beyond viewport boundaries */
+        }
+
+        /* First layer of stars: small, numerous, and move slower for a distant parallax effect */
+        .star-background::before {
+            content: ''; /* Required for pseudo-elements */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1px; /* Smallest star size */
+            height: 1px;
+            background: transparent; /* The element itself is transparent; stars are generated via box-shadow */
+            /* Extensive list of box-shadows to create individual stars across the screen */
+            box-shadow: 
+                10px 10px #FFF, 20px 30px #FFF, 50px 10px #FFF, 80px 20px #FFF, 100px 40px #FFF,
+                120px 60px #FFF, 150px 30px #FFF, 180px 70px #FFF, 200px 10px #FFF, 220px 90px #FFF,
+                240px 50px #FFF, 260px 20px #FFF, 280px 80px #FFF, 300px 10px #FFF, 320px 40px #FFF,
+                350px 90px #FFF, 380px 10px #FFF, 400px 60px #FFF, 420px 20px #FFF, 450px 80px #FFF,
+                480px 10px #FFF, 500px 30px #FFF, 520px 70px #FFF, 550px 20px #FFF, 580px 90px #FFF,
+                600px 50px #FFF, 620px 10px #FFF, 650px 80px #FFF, 680px 30px #FFF, 700px 90px #FFF,
+                720px 50px #FFF, 750px 10px #FFF, 780px 70px #FFF, 800px 20px #FFF, 820px 90px #FFF,
+                850px 50px #FFF, 880px 10px #FFF, 900px 70px #FFF, 920px 20px #FFF, 950px 90px #FFF,
+                980px 50px #FFF, 1000px 10px #FFF, 1020px 70px #FFF, 1050px 20px #FFF, 1080px 90px #FFF,
+                1100px 50px #FFF, 1120px 10px #FFF, 1150px 80px #FFF, 1180px 30px #FFF, 1200px 90px #FFF,
+                1220px 50px #FFF, 1250px 10px #FFF, 1280px 70px #FFF, 1300px 20px #FFF, 1320px 90px #FFF,
+                1350px 50px #FFF, 1380px 10px #FFF, 1400px 70px #FFF, 1420px 20px #FFF, 1450px 90px #FFF,
+                1480px 50px #FFF, 1500px 10px #FFF, 1520px 70px #FFF, 1550px 20px #FFF, 1580px 90px #FFF,
+                1600px 50px #FFF, 1620px 10px #FFF, 1650px 80px #FFF, 1680px 30px #FFF, 1700px 90px #FFF,
+                1720px 50px #FFF, 1750px 10px #FFF, 1780px 70px #FFF, 1800px 20px #FFF, 1820px 90px #FFF,
+                1850px 50px #FFF, 1880px 10px #FFF, 1900px 70px #FFF, 1920px 20px #FFF, 1950px 90px #FFF,
+                1980px 50px #FFF;
+            animation: move-stars-far 200s linear infinite; /* Animation for slower, distant stars */
+        }
+
+        /* Second layer of stars: slightly larger, fewer, and move faster for closer parallax */
+        .star-background::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px; /* Slightly larger star size */
+            height: 2px;
+            background: transparent;
+            /* Extensive list of box-shadows for more stars */
+            box-shadow:
+                30px 20px #E5E7EB, 70px 50px #E5E7EB, 90px 80px #E5E7EB, 110px 10px #E5E7EB, 140px 70px #E5E7EB,
+                170px 40px #E5E7EB, 190px 90px #E5E7EB, 210px 60px #E5E7EB, 230px 30px #E5E7EB, 260px 80px #E5E7EB,
+                290px 50px #E5E7EB, 310px 20px #E5E7EB, 340px 70px #E5E7EB, 370px 40px #E5E7EB, 390px 90px #E5E7EB,
+                420px 60px #E5E7EB, 450px 30px #E5E7EB, 470px 80px #E5E7EB, 500px 50px #E5E7EB, 530px 20px #E5E7EB,
+                560px 70px #E5E7EB, 590px 40px #E5E7EB, 610px 90px #E5E7EB, 640px 60px #E5E7EB, 670px 30px #E5E7EB,
+                700px 80px #E5E7EB, 730px 50px #E5E7EB, 760px 20px #E5E7EB, 790px 70px #E5E7EB, 820px 40px #E5E7EB,
+                850px 90px #E5E7EB, 880px 60px #E5E7EB, 910px 30px #E5E7EB, 940px 80px #E5E7EB, 970px 50px #E5E7EB,
+                1000px 20px #E5E7EB, 1030px 70px #E5E7EB, 1060px 40px #E5E7EB, 1090px 90px #E5E7EB, 1120px 60px #E5E7EB,
+                1150px 30px #E5E7EB, 1180px 80px #E5E7EB, 1210px 50px #E5E7EB, 1240px 20px #E5E7EB, 1270px 70px #E5E7EB,
+                1300px 40px #E5E7EB, 1330px 90px #E5E7EB, 1360px 60px #E5E7EB, 1390px 30px #E5E7EB, 1420px 80px #E5E7EB,
+                1450px 50px #E5E7EB, 1480px 20px #E5E7EB, 1510px 70px #E5E7EB, 1540px 40px #E5E7EB, 1570px 90px #E5E7EB,
+                1600px 60px #E5E7EB, 1630px 30px #E5E7EB, 1660px 80px #E5E7EB, 1690px 50px #E5E7EB, 1720px 20px #E5E7EB,
+                1750px 70px #E5E7EB, 1780px 40px #E5E7EB, 1810px 90px #E5E7EB, 1840px 60px #E5E7EB, 1870px 30px #E5E7EB,
+                1900px 80px #E5E7EB, 1930px 50px #E5E7EB, 1960px 20px #E5E7EB, 1990px 70px #E5E7EB;
+            animation: move-stars-close 100s linear infinite; /* Animation for faster, closer stars */
+        }
+
+        /* Keyframe animation for the slower, more distant stars layer */
+        @keyframes move-stars-far {
+            from { transform: translateY(0); }
+            to { transform: translateY(-2000px); } /* Simulates upward movement through space */
+        }
+
+        /* Keyframe animation for the faster, closer stars layer */
+        @keyframes move-stars-close {
+            from { transform: translateY(0); }
+            to { transform: translateY(-3000px); } /* Faster upward movement for more parallax */
+        }
+
+        /* --- Utility Styles (Tailwind-like customisations) --- */
+        /* Custom box-shadow for elements like headers and info boxes */
+        .shadow-custom-dark {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        }
+        /* Text gradient for prominent titles (e.g., "Solar System Explorer") */
+        .text-gradient-blue-purple {
+            background: linear-gradient(to right, #6366F1, #A855F7); /* Gradient from indigo to purple */
+            -webkit-background-clip: text; /* Clips the background to the text shape */
+            -webkit-text-fill-color: transparent; /* Makes the text color transparent to show the gradient */
+        }
+
+        /* --- Splash Screen Styling --- */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0a0a1f; /* Dark background matching the theme */
+            color: #E5E7EB; /* Light text color */
+            display: flex; /* Uses flexbox to center content */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-align: center;
+            z-index: 9999; /* Ensures it's the topmost element */
+            opacity: 1; /* Fully opaque by default */
+            transition: opacity 1s ease-out; /* Smooth fade-out transition */
+        }
+        /* Class added by JS to hide the splash screen */
+        #splash-screen.hidden {
+            opacity: 0; /* Fades out */
+            pointer-events: none; /* Prevents interaction after fading out */
+        }
+        #splash-screen .project-title {
+            font-size: 4rem; /* Larger font size for the main title */
+            background: linear-gradient(to right, #6366F1, #A855F7); /* Gradient for the project title */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+        #splash-screen .author-name {
+            font-size: 1.5rem;
+            color: #9CA3AF; /* Slightly muted color for author's name */
+        }
+
+
+        /* --- Sun Styling --- */
+        /* The Sun is dynamically placed within the 3D viewer */
+        #css-sun-in-viewer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Centers the Sun relative to its parent's origin */
+            width: 150px; /* Base size of the Sun */
+            height: 150px;
+            background-color: #FFD700; /* Gold color for the sun */
+            border-radius: 50%; /* Makes it perfectly round */
+            /* Advanced glowing effect using multiple, spread box-shadows */
+            box-shadow: 
+                0 0 50px 10px rgba(255, 215, 0, 0.8), /* Inner brightest core glow */
+                0 0 100px 20px rgba(255, 191, 0, 0.6), /* Mid-range glow */
+                0 0 150px 30px rgba(255, 165, 0, 0.4), /* Outer softer aura */
+                inset 0 0 30px rgba(255, 255, 255, 0.2); /* Subtle internal light variation/texture */
+            z-index: 0; /* Sun has a lower z-index than planets in the 3D space, allowing planets to orbit behind it */
+            cursor: pointer; /* Indicates interactivity for info box */
+            transition: transform 0.3s ease-in-out; /* Smooth scaling on hover */
+        }
+
+        #css-sun-in-viewer:hover {
+            transform: translate(-50%, -50%) scale(1.05); /* Slight enlargement on hover */
+        }
+
+        /* --- Common Info Box Styling (Sun and Planets) --- */
+        /* Styles applied to all pop-up information panels */
+        .info-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Centers the info box on screen */
+            z-index: 20; /* Ensures info boxes appear above all other content */
+            background-color: rgba(31, 41, 55, 0.95); /* Semi-transparent dark background */
+            backdrop-filter: blur(10px); /* Stronger blur for content behind the box */
+            border-radius: 12px;
+            padding: 2.5rem; /* Increased padding for more breathing room */
+            width: 90%;
+            max-width: 550px; /* Slightly wider max-width */
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 0, 0, 0.3); /* Enhanced shadow for depth */
+            color: #E5E7EB; /* Light text color */
+            text-align: center;
+            opacity: 0; /* Hidden by default for smooth fade-in */
+            pointer-events: none; /* Prevents interaction when hidden */
+            /* Smooth transitions for opacity, scale, and filter */
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out, backdrop-filter 0.4s ease-out;
+            display: flex; /* Uses flexbox for internal content alignment */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.25rem; /* Increased gap between elements */
+            /* Initial scale for a subtle pop-in effect */
+            transform: translate(-50%, -50%) scale(0.9);
+        }
+        /* Class added by JS to show the info box */
+        .info-box.show {
+            opacity: 1; /* Fully opaque */
+            pointer-events: auto; /* Allows interaction */
+            transform: translate(-50%, -50%) scale(1); /* Returns to normal size */
+        }
+
+        .info-box h2 {
+            font-size: 2rem; /* Larger font size for titles */
+            font-weight: 800;
+            margin-bottom: 0.75rem; /* Increased margin */
+        }
+
+        /* Specific gradient for Sun info box title */
+        #sun-info-box h2 {
+            background: linear-gradient(to right, #FCD34D, #EF4444); /* Yellow to Red gradient */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Specific gradient for Planet info box title */
+        .planet-info-box h2 {
+            background: linear-gradient(to right, #A78BFA, #3B82F6); /* Purple to Blue gradient */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .info-box p {
+            font-size: 1.05rem; /* Slightly larger paragraph text */
+            line-height: 1.6;
+            margin-bottom: 1.25rem; /* Increased margin */
+            color: #CBD5E0; /* Slightly darker text for body */
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+            margin-bottom: 1.25rem;
+            width: 100%; /* Ensures list takes full width */
+            max-width: 350px; /* Max width for readability */
+        }
+
+        .info-box ul li {
+            margin-bottom: 0.6rem; /* Slightly more spacing between list items */
+            font-size: 0.95rem;
+            color: #9CA3AF; /* Muted color for facts */
+            position: relative;
+            padding-left: 1rem;
+        }
+        .info-box ul li::before {
+            content: '•'; /* Custom bullet point */
+            position: absolute;
+            left: 0;
+            color: #6366F1; /* Bullet color */
+            font-weight: bold;
+        }
+
+        .info-box button {
+            background-color: #3B82F6; /* Blue button */
+            color: white;
+            padding: 0.85rem 2rem; /* Larger button padding */
+            border-radius: 10px; /* More rounded corners */
+            font-weight: 700; /* Bolder text */
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out; /* Smooth hover effects */
+            border: none; /* No default border */
+            cursor: pointer;
+        }
+
+        .info-box button:hover {
+            background-color: #2563EB; /* Darker blue on hover */
+            transform: translateY(-2px); /* Slight lift effect */
+        }
+        .info-box button:active {
+            transform: translateY(0); /* Press down effect */
+        }
+
+        /* --- Solar System Viewer (Main 3D Container for Sun, Planets, Orbits) --- */
+        #solar-system-viewer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            /* Applies 3D rotation (controlled by JS interaction) and dynamic perspective for zoom */
+            transform: translate(-50%, -50%) rotateX(var(--rotate-x, -20deg)) rotateY(var(--rotate-y, 20deg));
+            transform-style: preserve-3d; /* Essential for correct 3D positioning of nested elements */
+            perspective: var(--current-perspective, 1500px); /* Dynamic perspective for zoom/scale */
+            width: 1px; /* Acts as the central origin point for all child 3D elements */
+            height: 1px; /* Acts as the central origin point for all child 3D elements */
+            z-index: 1; /* Controls layering relative to header and static display */
+            transition: perspective 0.2s ease-out; /* Smooth zoom transition */
+        }
+
+        /* --- Individual Planet Orbit Paths and Planets --- */
+        /* Keyframe animation defining the orbital motion of planets */
+        @keyframes orbit {
+            from { transform: rotateY(0deg) translateX(var(--distance)) rotateY(0deg); }
+            /* The second rotateY(-360deg) counter-rotates the planet itself so its 'front' always faces the camera, */
+            /* preventing it from appearing to spin on its axis during orbit animation. */
+            to { transform: rotateY(360deg) translateX(var(--distance)) rotateY(-360deg); }
+        }
+
+        .planet-orbit {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform-origin: center center; /* Ensures the orbit happens around the central point */
+            animation: orbit linear infinite; /* Applies the continuous orbital motion */
+            animation-duration: var(--orbit-duration); /* Speed of orbit controlled by JS */
+            z-index: 0; /* Default z-index for individual planets within their orbit relative to each other */
+            transform-style: preserve-3d; /* Allows 3D transformations for the planet itself and rings */
+        }
+
+        /* Generic planet base styles - ENHANCED FOR 3D EFFECT AND REALISTIC LIGHTING */
+        .planet {
+            position: absolute;
+            border-radius: 50%; /* Makes the planet perfectly spherical */
+            /* Complex radial gradient background for realistic spherical shading, highlight, mid-tone, and shadow */
+            background: radial-gradient(circle at 25% 25%,
+                                        rgba(255,255,255,0.8) 0%,   /* Bright highlight (sun reflection) */
+                                        var(--planet-color) 30%,     /* Base planet color */
+                                        rgba(0,0,0,0.4) 70%,        /* Transition to shadow */
+                                        rgba(0,0,0,0.7) 100%);      /* Deepest shadow on the far side */
+            /* Subtle outer glow and inner shadow for more dimension */
+            box-shadow: 
+                0 0 8px rgba(255,255,255,0.1), /* Soft outer glow */
+                inset 0 0 10px rgba(0,0,0,0.5); /* Inner shadow for concavity/depth */
+
+            /* Centers the planet on its orbital path by offsetting by half its size */
+            left: calc(var(--size) / 2 * -1);
+            top: calc(var(--size) / 2 * -1);
+            cursor: pointer; /* Indicates interactivity */
+            transition: transform 0.3s ease-in-out; /* Smooth scaling on hover */
+        }
+
+        /* Hover effect for planets */
+        .planet:hover {
+            transform: scale(1.1); /* Slightly enlarge on hover */
+        }
+
+        /* --- Specific Planet Styles for Enhanced Realism (Highly Detailed Gradients) --- */
+        /* Each planet uses multiple `radial-gradient` layers to simulate unique textures and features. */
+
+        /* Mercury: Rocky, grey, with subtle crater-like variations */
+        #planet-mercury-sphere {
+            background: 
+                radial-gradient(circle at 40% 60%, rgba(50,50,50,0.3) 0%, transparent 20%), /* Crater hint 1 */
+                radial-gradient(circle at 70% 20%, rgba(50,50,50,0.4) 0%, transparent 25%), /* Crater hint 2 */
+                radial-gradient(circle at 10% 80%, rgba(50,50,50,0.2) 0%, transparent 15%), /* Crater hint 3 */
+                radial-gradient(circle at 30% 30%, #E0E0E0 0%, #A0A0A0 30%, #707070 70%, #404040 100%); /* Base grey, light to dark for spherical shading */
+        }
+        /* Venus: Hazy, warm, yellowish-brown atmosphere with subtle cloud patterns */
+        #planet-venus-sphere {
+            background: 
+                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 80%), /* General atmospheric haze */
+                radial-gradient(circle at 20% 70%, rgba(255,255,255,0.05) 0%, transparent 70%), /* Secondary haze layer */
+                radial-gradient(circle at 30% 30%, #F5DEB3 0%, #DAA520 40%, #D2691E 80%, #8B4513 100%); /* Base warm gradient */
+        }
+        /* Earth: Blue oceans, green/brown landmasses, and white clouds */
+        #planet-earth-sphere {
+            background: 
+                /* Landmasses: various positions and colors */
+                radial-gradient(circle at 60% 40%, rgba(34,139,34,0.7) 0%, transparent 40%), /* Green continent 1 */
+                radial-gradient(circle at 35% 70%, rgba(165,42,42,0.7) 0%, transparent 40%), /* Brown continent 2 */
+                radial-gradient(circle at 80% 20%, rgba(34,139,34,0.5) 0%, transparent 30%), /* Green continent 3 */
+                /* Clouds: subtle white overlays */
+                radial-gradient(circle at 20% 50%, rgba(255,255,255,0.2) 0%, transparent 60%), 
+                radial-gradient(circle at 80% 60%, rgba(255,255,255,0.2) 0%, transparent 60%),
+                radial-gradient(circle at 50% 15%, rgba(255,255,255,0.15) 0%, transparent 50%),
+                /* Base ocean colors for spherical shading */
+                radial-gradient(circle at 30% 30%, #87CEEB 0%, #00BFFF 30%, #0000CD 60%, #00008B 90%);
+        }
+        /* Mars: Dusty Red with deeper tones, hinting at polar caps */
+        #planet-mars-sphere {
+            background: 
+                radial-gradient(circle at 15% 15%, rgba(255,255,255,0.3) 0%, transparent 15%), /* North polar cap */
+                radial-gradient(circle at 85% 85%, rgba(255,255,255,0.3) 0%, transparent 15%), /* South polar cap */
+                radial-gradient(circle at 40% 60%, rgba(100,0,0,0.2) 0%, transparent 30%), /* Darker surface patch */
+                radial-gradient(circle at 30% 30%, #FF6347 0%, #DC143C 40%, #8B0000 80%, #550000 100%); /* Base red gradient */
+        }
+        /* Jupiter: Yellowish-brown with distinct bands and Great Red Spot hint */
+        #planet-jupiter-sphere {
+            background: 
+                /* Bands: subtle white linear gradients */
+                linear-gradient(to bottom, transparent 20%, rgba(255,255,255,0.1) 25%, transparent 30%),
+                linear-gradient(to bottom, transparent 45%, rgba(255,255,255,0.15) 50%, transparent 55%),
+                linear-gradient(to bottom, transparent 70%, rgba(255,255,255,0.1) 75%, transparent 80%),
+                /* Great Red Spot hint: subtle red radial gradient */
+                radial-gradient(circle at 70% 50%, rgba(255,0,0,0.15) 0%, transparent 30%),
+                /* Base gas giant colors */
+                radial-gradient(circle at 30% 30%, #F5DEB3 0%, #D2B48C 40%, #A0522D 80%, #69452F 100%);
+        }
+        /* Saturn: Similar to Jupiter body, but lighter tones, with subtle bands */
+        #planet-saturn-sphere {
+            background: 
+                linear-gradient(to bottom, transparent 20%, rgba(255,255,255,0.1) 25%, transparent 30%),
+                linear-gradient(to bottom, transparent 45%, rgba(255,255,255,0.15) 50%, transparent 55%),
+                radial-gradient(circle at 30% 30%, #F5DEB3 0%, #D2B48C 40%, #A0522D 80%, #69452F 100%); /* Base colors */
+        }
+        /* Uranus: Pale blue-green ice giant with subtle cloud hints */
+        #planet-uranus-sphere {
+            background: 
+                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 80%), /* Subtle cloud hint */
+                radial-gradient(circle at 20% 70%, rgba(255,255,255,0.05) 0%, transparent 70%), /* Secondary haze layer */
+                radial-gradient(circle at 30% 30%, #AFEEEE 0%, #4682B4 40%, #00CED1 80%, #20B2AA 100%); /* Base blue-green gradient */
+        }
+        /* Neptune: Deep blue ice giant with subtle atmospheric features */
+        #planet-neptune-sphere {
+            background: 
+                radial-gradient(circle at 60% 40%, rgba(255,255,255,0.1) 0%, transparent 70%), /* Subtle cloud hint */
+                radial-gradient(circle at 30% 30%, #4169E1 0%, #191970 40%, #00008B 80%, #000033 100%); /* Base deep blue gradient */
+        }
+
+        /* --- Saturn Rings - Highly Detailed and Layered --- */
+        .saturn-rings {
+            position: absolute;
+            width: var(--ring-outer-radius);
+            height: var(--ring-outer-radius);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotateX(70deg); /* Tilts the rings for a realistic angle */
+            background-color: transparent;
+            overflow: visible; /* Allows shadows/blurs to extend outside the main element */
+            z-index: -1; /* Ensures rings are behind the planet body */
+            /* Complex background using multiple radial and linear gradients to simulate banding and light interaction */
+            background:
+                /* Outermost faint band */
+                radial-gradient(ellipse at center,
+                    rgba(136, 119, 85, 0.05) 0%,
+                    rgba(136, 119, 85, 0.2) calc(var(--ring-inner-scale) * 60%),
+                    rgba(136, 119, 85, 0.4) calc(var(--ring-outer-scale) * 70%),
+                    transparent 100%
+                ),
+                /* Middle band */
+                radial-gradient(ellipse at center,
+                    rgba(136, 119, 85, 0.1) 0%,
+                    rgba(136, 119, 85, 0.3) calc(var(--ring-inner-scale) * 80%),
+                    rgba(136, 119, 85, 0.6) calc(var(--ring-outer-scale) * 90%),
+                    transparent 100%
+                ),
+                /* Innermost band (most opaque) */
+                radial-gradient(ellipse at center,
+                    rgba(136, 119, 85, 0.2) 0%,
+                    rgba(136, 119, 85, 0.5) calc(var(--ring-inner-scale) * 95%),
+                    rgba(136, 119, 85, 0.8) calc(var(--ring-outer-scale) * 100%),
+                    transparent 100%
+                ),
+                /* Subtle linear gradient for a faint shadowed/highlighted area across the rings */
+                linear-gradient(to right, rgba(136, 119, 85, 0.1), rgba(136, 119, 85, 0.05) 50%, rgba(136, 119, 85, 0.1));
+            /* Very subtle outer glow for the rings */
+            box-shadow: 0 0 5px rgba(255,255,255,0.05);
+        }
+        /* Explicitly remove content for pseudo-elements to avoid conflicts from earlier versions */
+        .saturn-rings::before,
+        .saturn-rings::after {
+            content: none;
+        }
+
+        /* --- Visual Orbital Paths --- */
+        /* Subtle dashed lines to indicate planetary orbits */
+        .orbit-path {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            border-radius: 50%; /* Makes the path circular */
+            border: 1px dashed rgba(255, 255, 255, 0.05); /* Very subtle dashed light gray line */
+            transform: translate(-50%, -50%) rotateX(70deg); /* Applies the same tilt as the solar system viewer for perspective */
+            z-index: -2; /* Ensures orbit lines are behind planets and the sun */
+            pointer-events: none; /* Prevents interaction with these purely visual elements */
+        }
+
+        /* --- Static Planets Display Section (Bottom Row for Quick Access) --- */
+        #static-planets-display {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex; /* Uses flexbox for horizontal layout */
+            justify-content: center; /* Centers items horizontally */
+            align-items: flex-end; /* Aligns items to the bottom */
+            gap: 1.5rem; /* Spacing between static planet icons */
+            padding: 1rem;
+            /* Gradient background fading from opaque black at the bottom to transparent upwards */
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            z-index: 10; /* Above the main solar system, but below info boxes */
+        }
+
+        .static-planet-item {
+            display: flex;
+            flex-direction: column; /* Stacks circle and name vertically */
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out; /* Smooth lift on hover */
+        }
+
+        .static-planet-item:hover {
+            transform: translateY(-5px); /* Lifts slightly on hover */
+        }
+
+        .static-planet-circle {
+            width: 40px; /* Size of the static planet icon */
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.3); /* Subtle white border */
+            box-shadow: 0 0 10px rgba(0,0,0,0.5); /* Shadow for depth */
+            /* Simple radial gradient for icon appearance, using the planet's base color */
+            background: radial-gradient(circle at 25% 25%, rgba(255,255,255,0.7), var(--planet-color) 70%);
+            margin-bottom: 0.5rem;
+            position: relative; /* For static Saturn rings positioning */
+        }
+        .static-planet-name {
+            color: #E5E7EB;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Specific static planet colors (using simpler gradients for icons for performance) */
+        #static-mercury { background: radial-gradient(circle at 30% 30%, #E0E0E0, #A0A0A0 70%); }
+        #static-venus { background: radial-gradient(circle at 30% 30%, #F5DEB3, #DAA520 70%); }
+        #static-earth { background: radial-gradient(circle at 30% 30%, #87CEEB, #00BFFF 70%); }
+        #static-mars { background: radial-gradient(circle at 30% 30%, #FF6347, #DC143C 70%); }
+        #static-jupiter { background: radial-gradient(circle at 30% 30%, #F5DEB3, #D2B48C 70%); }
+        #static-saturn { background: radial-gradient(circle at 30% 30%, #F5DEB3, #D2B48C 70%); }
+        #static-uranus { background: radial-gradient(circle at 30% 30%, #AFEEEE, #4682B4 70%); }
+        #static-neptune { background: radial-gradient(circle at 30% 30%, #4169E1, #191970 70%); }
+
+        /* Saturn rings for static display - simplified version for icon */
+        .static-saturn-rings {
+            position: absolute;
+            width: 60px; /* Size of the static rings */
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid rgba(136, 119, 85, 0.7); /* Ring color and thickness */
+            transform: translate(-50%, -50%) rotateX(70deg); /* Tilts the rings */
+            background-color: transparent;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            top: 50%;
+            left: 50%;
+            z-index: -1; /* Ensures rings are behind the static planet icon */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 antialiased">
+
+    <!-- Splash Screen: Displays project name and author before the main content loads -->
+    <div id="splash-screen">
+        <div class="project-title">Solar System Explorer</div>
+        <div class="author-name">By VATSAL GAVIT</div>
+    </div>
+
+    <!-- Header Section: Navigation and title for the application -->
+    <header class="absolute top-0 left-0 w-full p-2 z-20 bg-gray-900 bg-opacity-0 backdrop-blur-none shadow-none border-b border-gray-700">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
+            <h1 class="text-2xl md:text-3xl font-extrabold text-gradient-blue-purple tracking-wide">
+                Solar System Explorer <span class="block mt-0.5 text-sm md:text-lg font-light text-gray-400">By Vatsal Gavit</span>
+            </h1>
+            <nav>
+                <ul class="flex space-x-4 md:space-x-6">
+                    <li><a href="#" class="block px-3 py-2 rounded-md text-gray-300 hover:text-white hover:bg-blue-700 transition-colors duration-200 ease-in-out font-medium text-base md:text-lg">Home</a></li>
+                    <li><a href="#" class="block px-3 py-2 rounded-md text-gray-300 hover:text-white hover:bg-blue-700 transition-colors duration-200 ease-in-out font-medium text-base md:text-lg">Planets</a></li>
+                    <li><a href="#" class="block px-3 py-2 rounded-md text-gray-300 hover:text-white hover:bg-blue-700 transition-colors duration-200 ease-in-out font-medium text-base md:text-lg">About</a></li>
+                    <li><a href="#" class="block px-3 py-2 rounded-md text-gray-300 hover:text-white hover:bg-blue-700 transition-colors duration-200 ease-in-out font-medium text-base md:text-lg">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Information Box for the Sun -->
+    <div id="sun-info-box" class="info-box">
+        <h2>The Sun</h2>
+        <p>
+            The Sun is the star at the center of the Solar System. It is a nearly perfect sphere
+            of hot plasma, heated to incandescence by nuclear fusion reactions in its core.
+            The Sun is the most important source of energy for life on Earth.
+        </p>
+        <ul class="text-sm text-gray-400">
+            <li>Mass: ~1.989 × $10^{30}$ kg</li>
+            <li>Radius: ~695,700 km</li>
+            <li>Temperature: ~5,778 K (surface)</li>
+        </ul>
+        <button onclick="hideInfoBoxes()">Close</button>
+    </div>
+
+    <!-- Information Boxes for Each Planet (Pre-defined static content for simplicity) -->
+    <div id="mercury-info-box" class="info-box planet-info-box">
+        <h2>Mercury</h2>
+        <p>The smallest planet in our solar system and closest to the Sun.</p>
+        <ul class="text-sm text-gray-400">
+            <li>No moons</li>
+            <li>Extreme temperature variations (-173°C to 427°C)</li>
+            <li>Surface similar to the Moon</li>
+        </ul>
+        <button onclick="hideInfoBoxes()">Close</button>
+    </div>
+    <div id="venus-info-box" class="info-box planet-info-box">
+        <h2>Venus</h2>
+        <p>Earth’s "sister planet" but with a toxic atmosphere and extreme heat.</p>
+        <ul class="text-sm text-gray-400">
+            <li>Rotates in opposite direction to most planets</li>
+            <li>Hottest planet in our solar system (~462°C)</li>
+            <li>Thick, sulfuric acid clouds</li>
+        </ul>
+        <button onclick="hideInfoBoxes()">Close</button>
+    </div>
+    <div id="earth-info-box" class="info-box planet-info-box">
+        <h2>Earth</h2>
+        <p>Our home planet, unique for its abundant liquid water and life.</p>
+        <ul class="text-sm text-gray-400">
+            <li>One moon</li>
+            <li>Only known planet to support life</li>
+            <li>Atmosphere composed of nitrogen (78%) and oxygen (21%)</li>
+        </ul>
+        <button onclick="hideInfoBoxes()">Close</button>
+    </div>
+    <div id="mars-info-box" class="info-box planet-info-box">
+        <h2>Mars</h2>
+        <p>Known as the "Red Planet" due to iron oxide on its surface.</p>
+        <ul class="text-sm text-gray-400">
+            <li>Two moons: Phobos and Deimos</li>
+            <li>Home to the largest volcano in the solar system, Olympus Mons</li>
+            <li>Evidence of past liquid water</li>
+        </ul>
+        <button onclick="hideInfoBoxes()">Close</button>
+    </div>
+    <div id="jupiter-info-box" class="info-box planet-info-box">
+        <h2>Jupiter</h2>
+        <p>The largest planet in our solar system, a gas giant.</p>
+        <ul class="text-sm text-gray-400">
+            <li>More than 80 moons (e.g., Io, Europa, Ganymede, Callisto)</li>
+            <li>Has a Great Red Spot, a massive storm larger than Earth</li>
+            <li>Strong magnetic field</li>
+        </ul>
+        <button onclick="hideInfoBoxes()">Close</button>
+    </div>
+    <div id="saturn-info-box" class="info-box planet-info-box">
+        <h2>Saturn</h2>
+        <p>Famous for its prominent, beautiful ring system.</p>
+        <ul class="text-sm text-gray-400">
+            <li>Has 82 confirmed moons (e.g., Titan)</li>
+            <li>Rings are made of billions of ice particles and rock fragments</li>
+            <li>Less dense than water, would float if placed in a giant bathtub</li>
+        </ul>
+        <button onclick="hideInfoBoxes()">Close</button>
+    </div>
+    <div id="uranus-info-box" class="info-box planet-info-box">
+        <h2>Uranus</h2>
+        <p>An ice giant, known for its sideways rotation.</p>
+        <ul class="text-sm text-gray-400">
+            <li>Has 27 known moons</li>
+            <li>Tilted almost 90 degrees on its axis, essentially rolling on its side</li>
+            <li>Atmosphere contains methane, giving it a blue-green color</li>
+        </ul>
+        <button onclick="hideInfoBoxes()">Close</button>
+    </div>
+    <div id="neptune-info-box" class="info-box planet-info-box">
+        <h2>Neptune</h2>
+        <p>The outermost known planet in our solar system, an ice giant.</p>
+        <ul class="text-sm text-gray-400">
+            <li>Has 14 known moons (e.g., Triton)</li>
+            <li>Strongest winds in the solar system, reaching 2,100 km/h</li>
+            <li>Discovered through mathematical prediction, not direct observation'</li>
+        </ul>
+        <button onclick="hideInfoBoxes()">Close</button>
+    </div>
+
+    <!-- Solar System Viewer: The main 3D container for the Sun and orbiting planets -->
+    <div id="solar-system-viewer">
+        <!-- Sun: Placed directly within the viewer for correct 3D layering with planets -->
+        <div id="css-sun-in-viewer" class="absolute rounded-full" onclick="showSunInfo()"></div>
+        <!-- Planet orbits and planets will be dynamically added here by JavaScript -->
+    </div>
+
+    <!-- Static Planets Display Section: Provides interactive icons of planets at the bottom for quick access to info -->
+    <div id="static-planets-display">
+        <!-- Static planet icons will be dynamically added here by JavaScript -->
+    </div>
+
+    <!-- Main JavaScript Logic for interactivity, planet generation, and animations -->
+    <script type="module">
+        // --- Global Functions for Information Box Management ---
+        /**
+         * Displays the information box for the Sun.
+         * Ensures any other open info boxes are hidden before showing the Sun's.
+         */
+        window.showSunInfo = function() {
+            // hideInfoBoxes returns a Promise, ensuring previous boxes are hidden before showing new one
+            hideInfoBoxes().then(() => {
+                const sunInfoBox = document.getElementById('sun-info-box');
+                if (sunInfoBox) {
+                    sunInfoBox.style.display = 'flex'; // Make it flex immediately to allow transition
+                    setTimeout(() => sunInfoBox.classList.add('show'), 10); // Small delay to trigger CSS transition
+                }
+            });
+        };
+
+        /**
+         * Displays the information box for a specific planet.
+         * Ensures any other open info boxes are hidden before showing the selected planet's.
+         * @param {Object} planetData - The data object for the planet to display information about.
+         */
+        window.showPlanetInfo = function(planetData) {
+            hideInfoBoxes().then(() => {
+                const planetInfoBox = document.getElementById(`${planetData.name.toLowerCase()}-info-box`);
+                if (planetInfoBox) {
+                    planetInfoBox.style.display = 'flex'; // Make it flex immediately
+                    setTimeout(() => planetInfoBox.classList.add('show'), 10); // Small delay to trigger CSS transition
+                }
+            });
+        };
+
+        /**
+         * Hides all currently visible information boxes with a smooth fade-out effect.
+         * Manages the 'display' property to ensure the opacity transition completes gracefully.
+         * @returns {Promise<void>} A promise that resolves when all info boxes have finished hiding.
+         */
+        window.hideInfoBoxes = function() {
+            return new Promise(resolve => {
+                const infoBoxes = document.querySelectorAll('.info-box.show');
+                let transitionsPending = infoBoxes.length;
+
+                // If no info boxes are currently shown, resolve immediately
+                if (transitionsPending === 0) {
+                    resolve();
+                    return;
+                }
+
+                // Function to call when a transition ends
+                const onTransitionEnd = (event) => {
+                    // Ensure the transition property ending is 'opacity' to avoid issues with other transitions
+                    if (event.propertyName === 'opacity') {
+                        event.target.style.display = 'none'; // Hide the box after opacity transition
+                        event.target.removeEventListener('transitionend', onTransitionEnd); // Clean up listener
+                        transitionsPending--;
+                        if (transitionsPending === 0) {
+                            resolve(); // Resolve promise when all boxes are hidden
+                        }
+                    }
+                };
+
+                // Iterate over all visible info boxes to initiate hiding
+                infoBoxes.forEach(box => {
+                    box.addEventListener('transitionend', onTransitionEnd); // Attach listener
+                    box.classList.remove('show'); // Start the fade-out transition
+                });
+            });
+        };
+
+        // --- Main Application Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM element references
+            const solarSystemViewer = document.getElementById('solar-system-viewer');
+            const staticPlanetsDisplay = document.getElementById('static-planets-display');
+            // Re-added splashScreen element for visibility
+            const splashScreen = document.getElementById('splash-screen'); 
+            const body = document.body;
+
+            // --- Configuration Constants ---
+            const APP_SETTINGS = {
+                SPLASH_SCREEN_DURATION_MS: 3000, // Duration for the splash screen
+                INITIAL_VIEW_ROTATION_X: -20,    // Initial X-axis tilt for 3D perspective
+                INITIAL_VIEW_ROTATION_Y: 20,     // Initial Y-axis rotation
+                INITIAL_PERSPECTIVE: 1500,       // Initial zoom level (perspective value)
+                MIN_PERSPECTIVE: 800,            // Closest zoom limit
+                MAX_PERSPECTIVE: 3000,           // Furthest zoom limit
+                ZOOM_SENSITIVITY: 0.05,          // Controls scroll zoom speed
+                ROTATION_SENSITIVITY: 0.2,       // Controls mouse/touch drag rotation speed
+                MAX_TILT_X: 90,                  // Maximum X-axis tilt angle (prevents flipping)
+                ORBIT_SPEED_MULTIPLIER: 0.05,    // Adjusted back to make orbits slower (e.g., 0.005 -> 0.05)
+            };
+
+            // --- State Variables for Interaction ---
+            let currentPerspective = APP_SETTINGS.INITIAL_PERSPECTIVE;
+            let isDragging = false;
+            let startMouseX = 0;
+            let startMouseY = 0;
+            let currentRotateX = APP_SETTINGS.INITIAL_VIEW_ROTATION_X;
+            let currentRotateY = APP_SETTINGS.INITIAL_VIEW_ROTATION_Y;
+
+            /**
+             * Applies the current rotation and perspective values as CSS custom properties
+             * to the main solar system viewer element.
+             * This function is called whenever the view needs to be updated (drag, zoom).
+             */
+            const applyTransforms = () => {
+                // Set CSS variables for rotation angles
+                solarSystemViewer.style.setProperty('--rotate-x', `${currentRotateX}deg`);
+                solarSystemViewer.style.setProperty('--rotate-y', `${currentRotateY}deg`);
+                // Set CSS variable for perspective (zoom)
+                solarSystemViewer.style.setProperty('--current-perspective', `${currentPerspective}px`);
+            };
+
+            /**
+             * Initializes the main application components and sets up core interactions.
+             * This is the entry point after the DOM is fully loaded.
+             */
+            const initializeApp = () => {
+                applyTransforms(); // Apply initial view settings
+                setupGlobalFunctions(); // Ensure global functions are accessible (already defined in window)
+                setupCoreInteractions(); // Set up mouse/touch/wheel event listeners
+                renderSolarSystemElements(); // Dynamically create planets and orbits in the 3D viewer
+                renderStaticPlanetDisplay(); // Create the static planet icons at the bottom
+                manageSplashScreen(); // Re-enabled splash screen management
+            };
+
+            /**
+             * Sets up global functions for information box management.
+             * These are attached to the `window` object for easy access from inline `onclick` attributes.
+             */
+            const setupGlobalFunctions = () => {
+                // showSunInfo, showPlanetInfo, hideInfoBoxes are already defined globally.
+                // This function primarily serves as documentation and a placeholder if more global setup were needed.
+            };
+
+            /**
+             * Sets up all core mouse and touch event listeners for 360-degree rotation and zoom.
+             */
+            const setupCoreInteractions = () => {
+                // --- Mouse/Touch Down Event Listener ---
+                body.addEventListener('mousedown', (e) => handleMouseDown(e));
+                body.addEventListener('touchstart', (e) => handleTouchStart(e));
+
+                // --- Mouse/Touch Move Event Listener ---
+                body.addEventListener('mousemove', (e) => handleMouseMove(e));
+                body.addEventListener('touchmove', (e) => handleTouchMove(e));
+
+                // --- Mouse/Touch Up Event Listener ---
+                body.addEventListener('mouseup', () => handleMouseUp());
+                body.addEventListener('touchend', () => handleTouchEnd());
+
+                // --- Mouse Wheel Listener for Zoom ---
+                body.addEventListener('wheel', (e) => handleWheel(e));
+            };
+
+            /**
+             * Handles the mouse button down event to start dragging for solar system rotation.
+             * @param {MouseEvent} e - The mouse event object.
+             */
+            const handleMouseDown = (e) => {
+                // Check if the clicked target is an interactive element (info box, planet, Sun, static icon)
+                // If it is, prevent dragging to allow click interaction instead.
+                if (e.target.closest('.info-box') || e.target.closest('.planet') || e.target.id === 'css-sun-in-viewer' || e.target.closest('.static-planet-item')) {
+                    return;
+                }
+                isDragging = true;
+                body.classList.add('dragging'); // Visually indicate dragging state
+                startMouseX = e.clientX;
+                startMouseY = e.clientY;
+                hideInfoBoxes(); // Hide any open info boxes when a new drag interaction begins
+            };
+
+            /**
+             * Handles the touch start event to initiate touch-based rotation.
+             * @param {TouchEvent} e - The touch event object.
+             */
+            const handleTouchStart = (e) => {
+                // Only process if a single touch point is detected (for single-finger drag)
+                if (e.touches.length === 1) {
+                    // Check if the touched target is an interactive element.
+                    if (e.target.closest('.info-box') || e.target.closest('.planet') || e.target.id === 'css-sun-in-viewer' || e.target.closest('.static-planet-item')) {
+                        return;
+                    }
+                    isDragging = true;
+                    body.classList.add('dragging');
+                    startMouseX = e.touches[0].clientX;
+                    startMouseY = e.touches[0].clientY;
+                    hideInfoBoxes();
+                    e.preventDefault(); // Prevent default touch behaviors like scrolling
+                }
+            };
+
+            /**
+             * Handles mouse movement event to update rotation while dragging.
+             * @param {MouseEvent} e - The mouse event object.
+             */
+            const handleMouseMove = (e) => {
+                if (!isDragging) return; // Only execute if dragging is active
+
+                const deltaX = e.clientX - startMouseX; // Calculate horizontal movement
+                const deltaY = e.clientY - startMouseY; // Calculate vertical movement
+
+                // Update Y-axis rotation based on horizontal mouse movement
+                currentRotateY += deltaX * APP_SETTINGS.ROTATION_SENSITIVITY;
+                // Update X-axis rotation based on vertical mouse movement (inverted for natural feel)
+                currentRotateX -= deltaY * APP_SETTINGS.ROTATION_SENSITIVITY;
+
+                // Clamp X-axis rotation to prevent the view from flipping completely
+                currentRotateX = Math.max(-APP_SETTINGS.MAX_TILT_X, Math.min(APP_SETTINGS.MAX_TILT_X, currentRotateX));
+
+                applyTransforms(); // Apply the updated rotation to the viewer
+
+                // Update starting positions for the next movement calculation
+                startMouseX = e.clientX;
+                startMouseY = e.clientY;
+            };
+
+            /**
+             * Handles touch movement event to update touch-based rotation.
+             * @param {TouchEvent} e - The touch event object.
+             */
+            const handleTouchMove = (e) => {
+                if (!isDragging || e.touches.length !== 1) return;
+
+                const deltaX = e.touches[0].clientX - startMouseX;
+                const deltaY = e.touches[0].clientY - startMouseY;
+
+                currentRotateY += deltaX * APP_SETTINGS.ROTATION_SENSITIVITY;
+                currentRotateX -= deltaY * APP_SETTINGS.ROTATION_SENSITIVITY;
+
+                currentRotateX = Math.max(-APP_SETTINGS.MAX_TILT_X, Math.min(APP_SETTINGS.MAX_TILT_X, currentRotateX));
+
+                applyTransforms();
+
+                startMouseX = e.touches[0].clientX;
+                startMouseY = e.touches[0].clientY;
+                e.preventDefault(); // Prevent default touch behaviors
+            };
+
+            /**
+             * Handles the mouse button up event to stop dragging.
+             */
+            const handleMouseUp = () => {
+                isDragging = false;
+                body.classList.remove('dragging'); // Remove dragging cursor
+            };
+
+            /**
+             * Handles the touch end event to stop touch-based dragging.
+             */
+            const handleTouchEnd = () => {
+                isDragging = false;
+                body.classList.remove('dragging'); // Remove dragging cursor
+            };
+
+            /**
+             * Handles mouse wheel (scroll) event to implement zoom in/out functionality.
+             * @param {WheelEvent} e - The wheel event object.
+             */
+            const handleWheel = (e) => {
+                e.preventDefault(); // Prevent default page scrolling behavior
+
+                const delta = e.deltaY; // Get scroll direction: positive for scroll down (zoom out), negative for scroll up (zoom in)
+
+                // Adjust current perspective based on scroll direction and sensitivity
+                currentPerspective += delta * APP_SETTINGS.ZOOM_SENSITIVITY;
+
+                // Clamp the perspective value within defined minimum and maximum limits
+                currentPerspective = Math.max(APP_SETTINGS.MIN_PERSPECTIVE, Math.min(APP_SETTINGS.MAX_PERSPECTIVE, currentPerspective));
+
+                applyTransforms(); // Apply the new perspective to the viewer
+            };
+
+            /**
+             * Manages the initial splash screen display and subsequent hiding.
+             */
+            const manageSplashScreen = () => {
+                // Set a timeout to add the 'hidden' class to the splash screen after a specified duration
+                setTimeout(() => {
+                    if (splashScreen) {
+                        splashScreen.classList.add('hidden');
+                    }
+                }, APP_SETTINGS.SPLASH_SCREEN_DURATION_MS);
+            };
+
+            // --- Planet Data: Defines properties for each planet in the solar system ---
+            // Includes visual (size, color, rings), orbital (distance, speed), and informational (description, facts) data.
+            const planetData = [
+                {
+                    name: 'Mercury', size: 20, distance: 80, color: '#8A8A8A', orbitSpeed: 8,
+                    description: 'The smallest planet in our solar system and closest to the Sun.',
+                    facts: [
+                        'No moons',
+                        'Extreme temperature variations (-173°C to 427°C)',
+                        'Surface similar to the Moon'
+                    ]
+                },
+                {
+                    name: 'Venus', size: 30, distance: 110, color: '#E68A2E', orbitSpeed: 15,
+                    description: 'Earth’s "sister planet" but with a toxic atmosphere and extreme heat.',
+                    facts: [
+                        'Rotates in opposite direction to most planets',
+                        'Hottest planet in our solar system (~462°C)',
+                        'Thick, sulfuric acid clouds'
+                    ]
+                },
+                {
+                    name: 'Earth', size: 35, distance: 150, color: '#0077BE', orbitSpeed: 20,
+                    description: 'Our home planet, unique for its abundant liquid water and life.',
+                    facts: [
+                        'One moon',
+                        'Only known planet to support life',
+                        'Atmosphere composed of nitrogen (78%) and oxygen (21%)'
+                    ]
+                },
+                {
+                    name: 'Mars', size: 28, distance: 190, color: '#C1440E', orbitSpeed: 30,
+                    description: 'Known as the "Red Planet" due to iron oxide on its surface.',
+                    facts: [
+                        'Two moons: Phobos and Deimos',
+                        'Home to the largest volcano in the solar system, Olympus Mons',
+                        'Evidence of past liquid water'
+                    ]
+                },
+                {
+                    name: 'Jupiter', size: 70, distance: 280, color: '#C79B6E', orbitSpeed: 60,
+                    description: 'The largest planet in our solar system, a gas giant.',
+                    facts: [
+                        'More than 80 moons (e.g., Io, Europa, Ganymede, Callisto)',
+                        'Has a Great Red Spot, a massive storm larger than Earth',
+                        'Strong magnetic field'
+                    ]
+                },
+                {
+                    name: 'Saturn', size: 60, distance: 360, color: '#D3B996', orbitSpeed: 90, hasRings: true, ringInner: 75, ringOuter: 120, ringThickness: 10,
+                    description: 'Famous for its prominent, beautiful ring system.',
+                    facts: [
+                        'Has 82 confirmed moons (e.g., Titan)',
+                        'Rings are made of billions of ice particles and rock fragments',
+                        'Less dense than water, would float if placed in a giant bathtub'
+                    ]
+                },
+                {
+                    name: 'Uranus', size: 50, distance: 430, color: '#AFEEEE', orbitSpeed: 120,
+                    description: 'An ice giant, known for its sideways rotation.',
+                    facts: [
+                        'Has 27 known moons',
+                        'Tilted almost 90 degrees on its axis, essentially rolling on its side',
+                        'Atmosphere contains methane, giving it a blue-green color'
+                    ]
+                },
+                {
+                    name: 'Neptune', size: 48, distance: 480, color: '#4682B4', orbitSpeed: 150,
+                    description: 'The outermost known planet in our solar system, an ice giant.',
+                    facts: [
+                        'Has 14 known moons (e.g., Triton)',
+                        'Strongest winds in the solar system, reaching 2,100 km/h',
+                        'Discovered through mathematical prediction, not direct observation'
+                    ]
+                },
+            ];
+
+            /**
+             * Dynamically creates and renders all planet elements and their orbital paths
+             * within the main 3D solar system viewer.
+             */
+            const renderSolarSystemElements = () => {
+                // Ensure solarSystemViewer exists before appending children
+                if (!solarSystemViewer) {
+                    console.error("Error: #solar-system-viewer not found.");
+                    return;
+                }
+
+                planetData.forEach(data => {
+                    // Create and append the planet's orbit container
+                    const orbitDiv = createOrbitElement(data);
+                    solarSystemViewer.appendChild(orbitDiv); 
+
+                    // Create and append the planet's visual element
+                    const planetDiv = createPlanetElement(data);
+                    orbitDiv.appendChild(planetDiv); 
+
+                    // Add Saturn's rings if applicable
+                    if (data.hasRings) {
+                        const ringsDiv = createSaturnRingsElement(data);
+                        planetDiv.appendChild(ringsDiv);
+                    }
+
+                    // Create and append the visual orbit path
+                    const orbitPathDiv = createOrbitPathElement(data);
+                    solarSystemViewer.appendChild(orbitPathDiv);
+                });
+            };
+
+            /**
+             * Creates and configures a single planet's orbital div element.
+             * @param {Object} data - The planet's data object.
+             * @returns {HTMLDivElement} The configured orbit container div.
+             */
+            const createOrbitElement = (data) => {
+                const orbitDiv = document.createElement('div');
+                orbitDiv.className = 'planet-orbit';
+                orbitDiv.style.setProperty('--distance', `${data.distance}px`);
+                // Animation duration in seconds. Uses the new, smaller multiplier for faster orbits.
+                orbitDiv.style.setProperty('--orbit-duration', `${data.orbitSpeed * APP_SETTINGS.ORBIT_SPEED_MULTIPLIER}s`);
+                // Apply an initial random rotation to distribute planets around the Sun at start
+                orbitDiv.style.transform = `rotateY(${Math.random() * 360}deg) translateX(var(--distance)) rotateY(-${Math.random() * 360}deg)`;
+                return orbitDiv;
+            };
+
+            /**
+             * Creates and configures a single planet's visual sphere element.
+             * @param {Object} data - The planet's data object.
+             * @returns {HTMLDivElement} The configured planet sphere div.
+             */
+            const createPlanetElement = (data) => {
+                const planetDiv = document.createElement('div');
+                planetDiv.className = 'planet';
+                planetDiv.id = `planet-${data.name.toLowerCase()}-sphere`; // Unique ID for specific CSS styling
+                planetDiv.style.width = `${data.size}px`;
+                planetDiv.style.height = `${data.size}px`;
+                planetDiv.style.setProperty('--planet-color', data.color); // Used in some gradients
+                planetDiv.onclick = (e) => {
+                    e.stopPropagation(); // Prevent parent's drag event from firing
+                    showPlanetInfo(data); // Call global function to show info
+                };
+                return planetDiv;
+            };
+
+            /**
+             * Creates and configures Saturn's rings element.
+             * @param {Object} data - The planet's data object (specifically for Saturn).
+             * @returns {HTMLDivElement} The configured rings div.
+             */
+            const createSaturnRingsElement = (data) => {
+                const ringsDiv = document.createElement('div');
+                ringsDiv.className = 'saturn-rings';
+                ringsDiv.style.setProperty('--ring-inner-scale', `${data.ringInner / data.ringOuter}`);
+                ringsDiv.style.setProperty('--ring-outer-scale', `1`);
+                ringsDiv.style.setProperty('--ring-thickness', `${data.ringThickness}px`);
+                return ringsDiv;
+            };
+
+            /**
+             * Creates and configures a single orbital path element.
+             * @param {Object} data - The planet's data object.
+             * @returns {HTMLDivElement} The configured orbit path div.
+             */
+            const createOrbitPathElement = (data) => {
+                const orbitPathDiv = document.createElement('div');
+                orbitPathDiv.className = 'orbit-path';
+                orbitPathDiv.style.width = `${data.distance * 2}px`; /* Diameter is 2 * distance */
+                orbitPathDiv.style.height = `${data.distance * 2}px`; /* Diameter is 2 * distance */
+                return orbitPathDiv;
+            };
+
+            /**
+             * Dynamically creates and renders the static planet display at the bottom of the screen.
+             */
+            const renderStaticPlanetDisplay = () => {
+                if (!staticPlanetsDisplay) {
+                    console.error("Error: #static-planets-display not found.");
+                    return;
+                }
+
+                planetData.forEach(data => {
+                    const staticItem = createStaticPlanetItem(data);
+                    staticPlanetsDisplay.appendChild(staticItem);
+                });
+            };
+
+            /**
+             * Creates and configures a single static planet item (circle icon and name).
+             * @param {Object} data - The planet's data object.
+             * @returns {HTMLDivElement} The configured static planet item div.
+             */
+            const createStaticPlanetItem = (data) => {
+                const staticItem = document.createElement('div');
+                staticItem.className = 'static-planet-item';
+                staticItem.onclick = () => showPlanetInfo(data); // Clicking static icon shows main info box
+
+                const staticCircle = document.createElement('div');
+                staticCircle.className = 'static-planet-circle';
+                staticCircle.id = `static-${data.name.toLowerCase()}`;
+                staticCircle.style.setProperty('--planet-color', data.color);
+
+                // Add rings for static Saturn icon
+                if (data.hasRings) {
+                    const staticRings = document.createElement('div');
+                    staticRings.className = 'static-saturn-rings';
+                    staticCircle.appendChild(staticRings);
+                }
+
+                const staticName = document.createElement('div');
+                staticName.className = 'static-planet-name';
+                staticName.textContent = data.name;
+
+                staticItem.appendChild(staticCircle);
+                staticItem.appendChild(staticName);
+                return staticItem;
+            };
+
+            // Call the main initialization function when the DOM is ready
+            initializeApp();
+        });
+    </script>
+
+</body>
+</html>
