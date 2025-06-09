@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cybernetic AI Terminal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Default Cybernetic Terminal Theme */
+        :root {
+            --bg-color: #010a11;
+            --container-bg: #02101e;
+            --border-color: #00ffff; /* Electric Blue */
+            --header-bg: #031c30;
+            --text-color: #e0ffff; /* Light Cyan */
+            --accent-color: #00ffff;
+            --prompt-color: #33aaff;
+            --error-color: #ff3366; /* Neon Red */
+            --info-color: #cc00ff; /* Magenta */
+            --output-color: #00ff00; /* Green output text */
+            --glow-intensity: 0 0 8px var(--accent-color), 0 0 16px var(--accent-color);
+            --secondary-glow: 0 0 5px #00ff00; /* Green glow for specific elements */
+        }
+
+        /* Classic Green Screen Theme */
+        body[data-theme="green-screen"] {
+            --bg-color: #0a0a0a;
+            --container-bg: #001a00;
+            --border-color: #00ff00;
+            --header-bg: #001000;
+            --text-color: #00ff00;
+            --accent-color: #00ff00;
+            --prompt-color: #00cc00;
+            --error-color: #ff0000;
+            --info-color: #00ffff;
+            --output-color: #00ff00;
+            --glow-intensity: 0 0 5px var(--accent-color), 0 0 10px var(--accent-color);
+            --secondary-glow: 0 0 3px #00cc00;
+        }
+
+        /* Monochrome Theme */
+        body[data-theme="monochrome"] {
+            --bg-color: #1a1a1a;
+            --container-bg: #2b2b2b;
+            --border-color: #aaaaaa;
+            --header-bg: #3a3a3a;
+            --text-color: #eeeeee;
+            --accent-color: #cccccc;
+            --prompt-color: #888888;
+            --error-color: #ff6666;
+            --info-color: #9999ff;
+            --output-color: #dddddd;
+            --glow-intensity: none;
+            --secondary-glow: none;
+        }
+
+
+        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto Mono', monospace;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            padding: 1.5rem;
+            position: relative; /* For background effects */
+            transition: background-color 0.3s ease, color 0.3s ease; /* Smooth theme transitions */
+        }
+
+        /* Background Effects */
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        body::before {
+            background: 
+                linear-gradient(to right, rgba(0,255,255,0.05) 1px, transparent 1px) 0 0 / 2rem 2rem,
+                linear-gradient(to bottom, rgba(0,255,255,0.05) 1px, transparent 1px) 0 0 / 2rem 2rem;
+            opacity: 0.3;
+        }
+
+        body[data-theme="green-screen"]::before {
+            background: 
+                linear-gradient(to right, rgba(0,255,0,0.1) 1px, transparent 1px) 0 0 / 2rem 2rem,
+                linear-gradient(to bottom, rgba(0,255,0,0.1) 1px, transparent 1px) 0 0 / 2rem 2rem;
+            opacity: 0.5;
+        }
+        body[data-theme="monochrome"]::before {
+            background: none; /* No grid for monochrome */
+        }
+
+        body::after {
+            background: radial-gradient(circle at 20% 80%, rgba(0,255,255,0.1) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 20%, rgba(255,0,255,0.1) 0%, transparent 40%);
+            animation: pulse-glow 15s infinite alternate;
+        }
+
+        body[data-theme="green-screen"]::after {
+            background: radial-gradient(circle at 20% 80%, rgba(0,255,0,0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 20%, rgba(0,200,0,0.15) 0%, transparent 40%);
+        }
+
+        body[data-theme="monochrome"]::after {
+            background: none; /* No background glow for monochrome */
+        }
+
+        @keyframes pulse-glow {
+            0% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.02); }
+            100% { opacity: 0.5; transform: scale(1); }
+        }
+
+        /* Main Container */
+        .ai-playground-container {
+            background-color: var(--container-bg);
+            border: 1px solid rgba(0,255,255,0.3);
+            border-radius: 0.85rem; /* Slightly larger radius */
+            box-shadow: var(--glow-intensity); /* Main glow */
+            width: 100%;
+            max-width: 55rem;
+            height: 70vh;
+            min-height: 28rem;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            z-index: 100;
+            transition: height 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
+            padding-bottom: 0.5rem; /* Small internal padding to lift content */
+        }
+
+        /* Header */
+        header {
+            background-color: var(--header-bg);
+            padding: 0.9375rem 1.25rem;
+            border-bottom: 1px solid rgba(0,255,255,0.2);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            border-top-left-radius: 0.75rem;
+            border-top-right-radius: 0.75rem;
+            gap: 0.625rem;
+            transition: all 0.3s ease-in-out, background-color 0.3s ease, border-color 0.3s ease;
+            transform-origin: top;
+            height: auto; /* Allow header to size naturally */
+        }
+
+        header.hidden {
+            transform: translateY(-100%);
+            opacity: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            height: 0 !important; /* Force hide height */
+            border-bottom: none;
+            overflow: hidden; /* Hide content during transition */
+        }
+
+        .header-main-section {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            flex-grow: 1;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            margin-bottom: 0.25rem;
+            font-size: 1.3em;
+            color: var(--text-color);
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 5px var(--accent-color);
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+        .header-title i {
+            color: var(--accent-color);
+            transition: color 0.3s ease;
+        }
+
+        .header-developer-info {
+            font-size: 0.8em;
+            color: var(--prompt-color);
+            font-weight: 400;
+            text-shadow: 0 0 3px var(--prompt-color);
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 0.625rem;
+        }
+
+        .control-btn {
+            background-color: var(--container-bg);
+            border: 1px solid rgba(0,255,255,0.2);
+            border-radius: 0.3rem;
+            color: var(--accent-color);
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s ease, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.3125rem;
+            box-shadow: var(--secondary-glow);
+        }
+
+        .control-btn:hover {
+            background-color: rgba(0,255,255,0.1);
+            color: var(--text-color);
+            box-shadow: var(--glow-intensity);
+            border-color: var(--accent-color);
+        }
+
+        /* Console Output Area */
+        #console-output {
+            flex-grow: 1;
+            background-color: var(--bg-color);
+            padding: 0.9375rem;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+            color: var(--output-color); /* Green output text */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        #console-output p {
+            margin-bottom: 0.5em; /* Add spacing between paragraphs */
+        }
+
+        #console-output .prompt {
+            color: var(--prompt-color);
+            font-weight: 500; /* Make prompt text a bit bolder */
+            text-shadow: 0 0 2px var(--prompt-color); /* Subtle glow for prompt */
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        #console-output .error {
+            color: var(--error-color);
+            font-weight: 700; /* Extra bold for errors */
+            text-shadow: 0 0 5px var(--error-color); /* Strong glow for errors */
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        #console-output .info {
+            color: var(--info-color);
+            font-weight: 500; /* Bolder for info messages */
+            text-shadow: 0 0 3px var(--info-color); /* Glow for info messages */
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        /* Console Input Area */
+        .console-input-container {
+            display: flex;
+            background-color: var(--container-bg);
+            border-top: 1px solid rgba(0,255,255,0.2);
+            padding: 0.625rem 0.9375rem;
+            border-bottom-left-radius: 0.75rem;
+            border-bottom-right-radius: 0.75rem;
+            position: relative; /* For the new dropdown */
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        #console-prompt {
+            color: var(--text-color);
+            margin-right: 0.5rem;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9em;
+            align-self: center;
+            flex-shrink: 0;
+            transition: color 0.3s ease;
+        }
+
+        .input-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem; /* Spacing between prompt, button, and input */
+            flex-grow: 1;
+        }
+
+        #command-options-btn {
+            background-color: var(--bg-color);
+            border: 1px solid rgba(0,255,255,0.3);
+            border-radius: 0.375rem;
+            color: var(--accent-color);
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s ease, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(0,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.3125rem;
+            flex-shrink: 0;
+        }
+
+        #command-options-btn:hover {
+            border-color: var(--accent-color);
+            box-shadow: var(--glow-intensity), inset 0 0 5px rgba(0,255,255,0.3);
+        }
+
+        #command-options-dropdown {
+            position: absolute;
+            bottom: calc(100% + 0.5rem); /* Position above the input container */
+            left: 0.9375rem;
+            background-color: var(--header-bg);
+            border: 1px solid var(--accent-color);
+            border-radius: 0.5rem;
+            box-shadow: var(--glow-intensity);
+            list-style: none;
+            padding: 0.5rem 0;
+            min-width: 12rem;
+            max-height: 15rem;
+            overflow-y: auto;
+            z-index: 200;
+            display: none; /* Hidden by default */
+            transform-origin: bottom left;
+            animation: fadeInScaleUp 0.2s ease-out forwards;
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        @keyframes fadeInScaleUp {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        #command-options-dropdown.show {
+            display: block;
+        }
+
+        #command-options-dropdown li {
+            padding: 0.6rem 1rem;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: background-color 0.15s ease, color 0.15s ease, text-shadow 0.15s ease;
+        }
+
+        #command-options-dropdown li:hover {
+            background-color: rgba(0,255,255,0.1);
+            color: var(--accent-color);
+            text-shadow: 0 0 5px var(--accent-color);
+        }
+
+
+        #console-input {
+            flex-grow: 1;
+            background-color: var(--bg-color);
+            border: 1px solid rgba(0,255,255,0.3);
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            color: var(--text-color);
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9em;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease, color 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(0,255,255,0.1);
+        }
+
+        #console-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: var(--glow-intensity), inset 0 0 5px rgba(0,255,255,0.3);
+        }
+
+        #console-input::placeholder {
+            color: rgba(0,255,255,0.5);
+            opacity: 0.7;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 1.5rem;
+            font-size: 0.8em;
+            color: var(--info-color);
+            text-align: center;
+            text-shadow: 0 0 5px var(--info-color);
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        footer a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: text-shadow 0.2s ease, color 0.3s ease;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+            text-shadow: var(--glow-intensity);
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(0.6rem); /* Stronger blur */
+            z-index: 10000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: var(--header-bg);
+            border: 1px solid var(--accent-color);
+            border-radius: 0.75rem;
+            box-shadow: var(--glow-intensity);
+            width: 90%;
+            max-width: 40rem;
+            max-height: 85vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            padding: 1.5rem;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0.9375rem;
+            border-bottom: 1px dashed rgba(0,255,255,0.2);
+            margin-bottom: 1.25rem;
+        }
+
+        .modal-header h3 {
+            color: var(--accent-color);
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            text-shadow: 0 0 5px var(--accent-color);
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            color: var(--info-color);
+            font-size: 1.6em;
+            cursor: pointer;
+            transition: color 0.2s ease, text-shadow 0.2s ease;
+        }
+
+        .modal-close-btn:hover {
+            color: var(--error-color);
+            text-shadow: 0 0 8px var(--error-color);
+        }
+
+        .modal-section-title {
+            color: var(--prompt-color);
+            font-size: 1.2em;
+            border-bottom: 1px dashed rgba(0,255,255,0.2);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            text-shadow: 0 0 5px var(--prompt-color);
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        /* Settings and About Modal Specifics */
+        .settings-group, .about-content {
+            margin-bottom: 1.25rem;
+        }
+
+        .settings-item {
+            margin-bottom: 0.9375rem;
+        }
+
+        .settings-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            font-size: 0.95em;
+            transition: color 0.3s ease;
+        }
+
+        .settings-input[type="text"],
+        .settings-input[type="password"],
+        .settings-input[type="number"],
+        .settings-input[type="radio"] + label { /* For radio buttons */
+            width: 100%;
+            padding: 0.625rem 0.75rem;
+            background-color: var(--bg-color);
+            border: 1px solid rgba(0,255,255,0.3);
+            border-radius: 0.375rem;
+            color: var(--text-color);
+            font-size: 0.9em;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease, color 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(0,255,255,0.1);
+        }
+
+        .settings-input[type="text"]:focus,
+        .settings-input[type="password"]:focus,
+        .settings-input[type="number"]:focus {
+            border-color: var(--accent-color);
+            box-shadow: var(--glow-intensity), inset 0 0 5px rgba(0,255,255,0.3);
+        }
+
+        .settings-input[type="checkbox"] {
+            margin-right: 0.5rem;
+            accent-color: var(--accent-color); /* Style the checkbox itself */
+            transition: accent-color 0.3s ease;
+        }
+
+        .settings-radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .settings-radio-group label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.5rem;
+            border: 1px solid var(--container-bg); /* Use container bg for default border */
+            border-radius: 0.3rem;
+            transition: all 0.2s ease;
+        }
+
+        .settings-radio-group input[type="radio"] {
+            margin-right: 0.5rem;
+            appearance: none; /* Hide default radio button */
+            width: 1rem;
+            height: 1rem;
+            border: 1px solid var(--accent-color);
+            border-radius: 50%;
+            display: inline-grid;
+            place-content: center;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+
+        .settings-radio-group input[type="radio"]::before {
+            content: "";
+            width: 0.6rem;
+            height: 0.6rem;
+            border-radius: 50%;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em var(--accent-color);
+            background-color: CanvasText;
+        }
+
+        .settings-radio-group input[type="radio"]:checked::before {
+            transform: scale(1);
+        }
+
+        .settings-radio-group label:hover {
+            background-color: rgba(0,255,255,0.05);
+            border-color: rgba(0,255,255,0.1);
+        }
+        .settings-radio-group input[type="radio"]:checked + span {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+
+        .about-content p {
+            margin-bottom: 0.9375rem;
+            line-height: 1.6;
+            color: var(--text-color);
+            transition: color 0.3s ease;
+        }
+
+        .about-content ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .about-content ul li {
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            font-weight: 500; /* Bolder list items */
+            text-shadow: 0 0 1px rgba(255,255,255,0.2); /* Subtle glow for list text */
+        }
+
+        .about-content ul li i {
+            color: var(--accent-color);
+            transition: color 0.3s ease;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 0.6rem;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--header-bg);
+            border-radius: 0.3rem;
+            box-shadow: inset 0 0 5px rgba(0,255,255,0.1);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 0.3rem;
+            border: 2px solid var(--header-bg);
+            box-shadow: 0 0 8px var(--accent-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #66ffff; /* Lighter blue on hover */
+            box-shadow: 0 0 12px var(--accent-color);
+        }
+
+        /* --- Mobile Responsiveness --- */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .ai-playground-container {
+                height: 88vh; /* Taller on mobile */
+                min-height: 25rem;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 0.75rem 1rem;
+                font-size: 0.95em;
+            }
+
+            .header-main-section {
+                margin-bottom: 0.5rem;
+                width: 100%;
+            }
+
+            .header-title {
+                font-size: 1.1em;
+            }
+
+            .header-controls {
+                width: 100%;
+                justify-content: space-around;
+            }
+
+            .control-btn {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.8em;
+            }
+
+            #console-prompt, #console-input {
+                font-size: 0.85em;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 1rem;
+                max-height: 90vh;
+            }
+
+            .modal-header h3 {
+                font-size: 1.1em;
+            }
+
+            .modal-close-btn {
+                font-size: 1.3em;
+            }
+
+            .modal-section-title {
+                font-size: 1em;
+            }
+
+            .settings-label, .about-content p, .about-content ul li {
+                font-size: 0.85em;
+            }
+
+            .input-controls {
+                flex-wrap: wrap; /* Allow wrapping on small screens */
+                gap: 0.3rem;
+            }
+            #command-options-btn {
+                order: 2; /* Place button below prompt if wrapped */
+                flex-grow: 1; /* Allow button to take more space */
+            }
+            #console-input {
+                order: 3; /* Input below button if wrapped */
+                width: 100%; /* Take full width if wrapped */
+            }
+            #console-prompt {
+                order: 1; /* Prompt stays first */
+            }
+            #command-options-dropdown {
+                left: 0.5rem; /* Adjust position for mobile */
+                width: calc(100% - 1rem); /* Full width minus padding */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .ai-playground-container {
+                border-radius: 0;
+                height: 100vh;
+                min-height: auto;
+                box-shadow: none; /* No glow on full screen mobile for cleaner look */
+            }
+
+            body {
+                padding: 0;
+            }
+
+            header {
+                border-radius: 0;
+                border-bottom: none; /* Remove bottom border for full height header */
+            }
+
+            .console-input-container {
+                border-radius: 0;
+            }
+
+            .header-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.4rem;
+            }
+
+            .control-btn {
+                flex: 1 1 auto;
+                min-width: 45%;
+            }
+
+            #console-prompt {
+                font-size: 0.8em;
+            }
+
+            #console-input {
+                font-size: 0.8em;
+            }
+
+            footer {
+                display: none;
+            }
+
+            .modal-content {
+                border-radius: 0;
+                max-height: 100vh;
+                height: 100%;
+                box-shadow: none;
+                justify-content: center; /* Center content vertically */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ai-playground-container">
+        <header id="main-header">
+            <div class="header-main-section">
+                <div class="header-title">
+                    <i class="fas fa-flask"></i> CYBERNETIC AI TERMINAL
+                </div>
+                <div class="header-developer-info">
+                    Developed by VATSAL GAVIT
+                </div>
+            </div>
+            <div class="header-controls">
+                <button class="control-btn" id="toggle-header-btn" aria-label="Toggle Header Visibility" title="Toggle Header Visibility">
+                    <i class="fas fa-eye-slash"></i> <span class="btn-text">Hide Header</span>
+                </button>
+                <button class="control-btn" id="open-settings-modal" aria-label="Open Settings" title="Open Settings">
+                    <i class="fas fa-cog"></i> <span class="btn-text">Settings</span>
+                </button>
+                <button class="control-btn" id="open-about-modal" aria-label="Open About Page" title="Open About Page">
+                    <i class="fas fa-info-circle"></i> <span class="btn-text">About</span>
+                </button>
+            </div>
+        </header>
+
+        <div id="console-output">
+            <span class="info">INITIATING CYBERNETIC PROTOCOL...</span><br>
+            <span class="info">Welcome to the Cybernetic AI Terminal.</span><br>
+            <span class="info">ACCESS GRANTED.</span><br>
+            <span class="info">Type <span class="prompt">/help</span> for system commands.</span><br><br>
+        </div>
+
+        <div class="console-input-container">
+            <span id="console-prompt">user@ai-matrix:~$</span>
+            <div class="input-controls">
+                <button id="command-options-btn" title="Show available commands">
+                    <i class="fas fa-list-alt"></i> Commands
+                </button>
+                <input type="text" id="console-input" autofocus placeholder="Enter command...">
+            </div>
+            <ul id="command-options-dropdown">
+                <li data-command="/summarize">Summarize Text</li>
+                <li data-command="/translate">Translate Text</li>
+                <li data-command="/analyze">Analyze Data</li>
+                <li data-command="/diagnose">Diagnose System</li>
+                <li data-command="/visualize">Visualize Data</li>
+                <li data-command="/echo">Echo Text</li>
+                <li data-command="/help">Show Help</li>
+                <li data-command="/status">System Status</li>
+                <li data-command="/ping">Network Ping</li>
+                <li data-command="/clear_history">Clear History</li>
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+        <i class="fas fa-code"></i> Developed by <a href="https://www.instagram.com/vatsal.gavitt/" target="_blank">@vatsal.gavitt</a> / <a href="https://www.instagram.com/hackthecode09/" target="_blank">@hackthecode09</a>
+        <br>GitHub Repository: <a href="https://github.com/NONSTOPPEBLE/25-Days-AI-Journey" target="_blank">25-Days-AI-Journey</a>
+    </footer>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="settings-modal-title"><i class="fas fa-cog"></i> System Configurations</h3>
+                <button class="modal-close-btn" aria-label="Close Settings"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="settings-group">
+                <div class="modal-section-title">API Authentication (Simulated)</div>
+                <div class="settings-item">
+                    <label for="openai-api-key" class="settings-label">OpenAI API Key:</label>
+                    <input type="password" id="openai-api-key" class="settings-input" placeholder="sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" autocomplete="off">
+                </div>
+                <div class="settings-item">
+                    <label for="google-ai-api-key" class="settings-label">Google AI API Key:</label>
+                    <input type="password" id="google-ai-api-key" class="settings-input" placeholder="AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXX" autocomplete="off">
+                </div>
+                <div class="settings-item">
+                    <label for="custom-api-endpoint" class="settings-label">Custom Backend Endpoint:</label>
+                    <!-- UPDATED DEFAULT VALUE FOR REPLIT -->
+                    <input type="text" id="custom-api-endpoint" class="settings-input" value="/api/ai_command" placeholder="e.g., /api/ai_command">
+                </div>
+            </div>
+            <div class="settings-group">
+                <div class="modal-section-title">Terminal Preferences</div>
+                <div class="settings-item">
+                    <label class="settings-label">
+                        <input type="checkbox" id="show-timestamps" checked> Display Timestamps in Output
+                    </label>
+                </div>
+                <div class="settings-item">
+                    <label class="settings-label">
+                        <input type="checkbox" id="enable-animations-console" checked> Enable Typing Animations
+                    </label>
+                </div>
+                <div class="settings-item">
+                    <label for="theme-selector" class="settings-label">Terminal Theme:</label>
+                    <div class="settings-radio-group" id="theme-selector">
+                        <label>
+                            <input type="radio" name="terminal-theme" value="cybernetic" checked>
+                            <span>Cybernetic Terminal</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="terminal-theme" value="green-screen">
+                            <span>Classic Green Screen</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="terminal-theme" value="monochrome">
+                            <span>Monochrome</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div id="about-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="about-modal-title">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="about-modal-title"><i class="fas fa-info-circle"></i> About This Interface</h3>
+                <button class="modal-close-btn" aria-label="Close About Page"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="about-content">
+                <p>This **Cybernetic AI Terminal** is a conceptual project simulating a command-line interface for interacting with advanced AI functionalities. It's built as part of my **"25 Days AI Journey,"** exploring modern web development and AI integration.</p>
+
+                <div class="modal-section-title">Core Modules (Simulated)</div>
+                <ul>
+                    <li><i class="fas fa-terminal"></i> <strong>Console Core:</strong> High-fidelity interactive command processing.</li>
+                    <li><i class="fas fa-robot"></i> <strong>AI Summarization Module:</strong> Compresses large data streams into concise summaries (e.g., <code>/summarize</code>).</li>
+                    <li><i class="fas fa-exchange-alt"></i> <strong>Neural Translation Unit:</strong> Facilitates cross-linguistic data conversion (e.g., <code>/translate</code>).</li>
+                    <li><i class="fas fa-chart-line"></i> <strong>Data Analysis Engine:</strong> Identifies patterns and anomalies in data (e.g., <code>/analyze</code>).</li>
+                    <li><i class="fas fa-heartbeat"></i> <strong>System Diagnostic Utility:</strong> Performs health checks and suggests resolutions (e.g., <code>/diagnose</code>).</li>
+                    <li><i class="fas fa-chart-bar"></i> <strong>Visualization Protocol:</strong> Generates textual data representations (e.g., <code>/visualize</code>).</li>
+                    <li><i class="fas fa-wrench"></i> <strong>System Configuration Interface:</strong> Allows dynamic adjustment of operational parameters.</li>
+                    <li><i class="fas fa-scroll"></i> <strong>Command Log Retention:</strong> Provides access to historical interaction records.</li>
+                </ul>
+
+                <div class="modal-section-title">Architect Info</div>
+                <ul>
+                    <li><i class="fas fa-user-secret"></i> <strong>VATSAL GAVIT</strong> - Lead Architect</li>
+                    <li><i class="fab fa-instagram"></i> Instagram:
+                        <a href="https://www.instagram.com/vatsal.gavitt/" target="_blank">@vatsal.gavitt</a>,
+                        <a href="https://www.instagram.com/hackthecode09/" target="_blank">@hackthecode09</a>
+                    </li>
+                    <li><i class="fab fa-github"></i> GitHub Repository:
+                        <a href="https://github.com/NONSTOPPEBLE/25-Days-AI-Journey" target="_blank">NONSTOPPEBLE/25-Days-AI-Journey</a>
+                    </li>
+                </ul>
+
+                <div class="modal-section-title">Operational Directive</div>
+                <p>This terminal is a frontend proof-of-concept. While the interface is fully interactive, the AI responses are currently <strong>simulated</strong>. In a live deployment, a robust Flask backend would process these commands and interface with real AI services like OpenAI or Google Gemini, demonstrating seamless human-AI collaboration.</p>
+                <p>Proceed with interaction. Your data stream is valued.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const mainHeader = document.getElementById('main-header');
+        const consoleOutput = document.getElementById('console-output');
+        const consoleInput = document.getElementById('console-input');
+        const settingsModal = document.getElementById('settings-modal');
+        const aboutModal = document.getElementById('about-modal');
+        const toggleHeaderBtn = document.getElementById('toggle-header-btn');
+        const toggleHeaderText = toggleHeaderBtn.querySelector('.btn-text');
+        const toggleHeaderIcon = toggleHeaderBtn.querySelector('i');
+        const container = document.querySelector('.ai-playground-container');
+        const commandOptionsBtn = document.getElementById('command-options-btn');
+        const commandOptionsDropdown = document.getElementById('command-options-dropdown');
+        const themeRadios = document.querySelectorAll('input[name="terminal-theme"]');
+
+        // Function to set focus on console input
+        function focusConsoleInput() {
+            consoleInput.focus();
+        }
+
+        // Apply saved theme on load
+        function applyTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            // Update glow colors based on theme if needed, or rely on CSS vars
+            if (theme === 'monochrome') {
+                document.documentElement.style.setProperty('--glow-intensity', 'none');
+                document.documentElement.style.setProperty('--secondary-glow', 'none');
+            } else if (theme === 'green-screen') {
+                document.documentElement.style.setProperty('--glow-intensity', '0 0 5px var(--accent-color), 0 0 10px var(--accent-color)');
+                document.documentElement.style.setProperty('--secondary-glow', '0 0 3px #00cc00');
+            } else { // cybernetic
+                document.documentElement.style.setProperty('--glow-intensity', '0 0 8px var(--accent-color), 0 0 16px var(--accent-color)');
+                document.documentElement.style.setProperty('--secondary-glow', '0 0 5px #00ff00');
+            }
+        }
+
+        // Modal Open/Close Logic
+        document.getElementById('open-settings-modal').addEventListener('click', () => {
+            settingsModal.classList.add('active');
+        });
+
+        document.getElementById('open-about-modal').addEventListener('click', () => {
+            aboutModal.classList.add('active');
+        });
+
+        document.querySelectorAll('.modal-close-btn').forEach(button => {
+            button.addEventListener('click', (event) => {
+                event.target.closest('.modal-overlay').classList.remove('active');
+                focusConsoleInput(); // Re-focus console input after closing modal
+            });
+        });
+
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (event) => {
+                if (event.target === overlay) { // Only close if clicked directly on overlay
+                    overlay.classList.remove('active');
+                    focusConsoleInput(); // Re-focus console input after closing modal
+                }
+            });
+        });
+
+        // Header Toggle Logic
+        toggleHeaderBtn.addEventListener('click', () => {
+            mainHeader.classList.toggle('hidden');
+            if (mainHeader.classList.contains('hidden')) {
+                toggleHeaderText.textContent = 'Show Header';
+                toggleHeaderIcon.className = 'fas fa-eye';
+                // Calculate height based on full viewport minus body padding and footer height
+                // Get current computed style of body for padding values
+                const computedBodyStyle = getComputedStyle(document.body);
+                const bodyPaddingTop = parseFloat(computedBodyStyle.paddingTop);
+                const bodyPaddingBottom = parseFloat(computedBodyStyle.paddingBottom);
+                const footerHeight = document.querySelector('footer') ? document.querySelector('footer').offsetHeight : 0;
+
+                container.style.height = `calc(100vh - ${footerHeight + bodyPaddingTop + bodyPaddingBottom}px)`;
+            } else {
+                toggleHeaderText.textContent = 'Hide Header';
+                toggleHeaderIcon.className = 'fas fa-eye-slash';
+                container.style.height = '70vh'; // Revert to original height
+            }
+            focusConsoleInput(); // Re-focus console input after header toggle
+        });
+
+        // Command Options Dropdown Logic
+        commandOptionsBtn.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent click from immediately propagating to document
+            commandOptionsDropdown.classList.toggle('show');
+            if (commandOptionsDropdown.classList.contains('show')) {
+                // Scroll to make sure dropdown is visible if near edge
+                commandOptionsDropdown.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        });
+
+        commandOptionsDropdown.addEventListener('click', (event) => {
+            const selectedOption = event.target.closest('li');
+            if (selectedOption && selectedOption.dataset.command) {
+                const command = selectedOption.dataset.command;
+                consoleInput.value = command;
+                commandOptionsDropdown.classList.remove('show'); // Hide dropdown
+                focusConsoleInput(); // Focus input
+                // Move cursor to the end of the pre-filled command
+                consoleInput.selectionStart = consoleInput.selectionEnd = consoleInput.value.length;
+
+                // Provide guidance in the console output
+                const guidanceLine = document.createElement('p');
+                guidanceLine.className = 'info';
+                guidanceLine.innerHTML = `<span class="prompt">SYSTEM:</span> Now, complete the command by typing your input data/arguments.`;
+                consoleOutput.appendChild(guidanceLine);
+                consoleOutput.scrollTop = consoleOutput.scrollHeight;
+            }
+        });
+
+        // Close dropdown when clicking anywhere else on the document
+        document.addEventListener('click', (event) => {
+            if (!commandOptionsBtn.contains(event.target) && !commandOptionsDropdown.contains(event.target)) {
+                commandOptionsDropdown.classList.remove('show');
+            }
+        });
+
+
+        // Console Logic
+        const commandHistory = [];
+        let historyIndex = -1;
+
+        consoleInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const command = consoleInput.value.trim();
+                consoleInput.value = '';
+                // Only push to history if command is not empty and not the same as last (or if history is empty)
+                if (command && (commandHistory.length === 0 || commandHistory[commandHistory.length - 1] !== command)) {
+                    commandHistory.push(command);
+                }
+                historyIndex = commandHistory.length; // Reset history index to end
+
+                if (command) {
+                    displayCommand(command);
+                    processCommand(command);
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault(); // Prevent cursor from moving to the beginning of the input
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    consoleInput.value = commandHistory[historyIndex];
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault(); // Prevent cursor from moving to the end of the input
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    consoleInput.value = commandHistory[historyIndex];
+                } else {
+                    historyIndex = commandHistory.length;
+                    consoleInput.value = ''; // Clear input if at the end of history
+                }
+            }
+        });
+
+        async function typeWriterEffect(text, targetElement, speed = 20) {
+            const enableAnimations = document.getElementById('enable-animations-console').checked;
+            if (!enableAnimations) {
+                targetElement.innerHTML += text; // Use innerHTML to allow for bold tags etc.
+                consoleOutput.scrollTop = consoleOutput.scrollHeight;
+                return;
+            }
+
+            for (let i = 0; i < text.length; i++) {
+                await new Promise(resolve => setTimeout(resolve, speed));
+                targetElement.textContent += text[i];
+                consoleOutput.scrollTop = consoleOutput.scrollHeight; // Keep scrolling
+            }
+        }
+
+        async function displayCommand(command) {
+            const timestamp = document.getElementById('show-timestamps').checked ? `[${new Date().toLocaleTimeString()}] ` : '';
+            const commandLine = document.createElement('p');
+
+            const promptSpan = document.createElement('span');
+            promptSpan.className = 'prompt';
+            promptSpan.textContent = `${timestamp}user@ai-matrix:~$`;
+            commandLine.appendChild(promptSpan);
+
+            commandLine.appendChild(document.createTextNode(` ${command}`));
+
+            consoleOutput.appendChild(commandLine);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        // Updated processCommand to handle /help client-side instantly
+        async function processCommand(command) {
+            const outputLine = document.createElement('p');
+            consoleOutput.appendChild(outputLine);
+
+            const parts = command.toLowerCase().split(' ');
+            const cmd = parts[0];
+            const args = command.substring(cmd.length).trim();
+
+            let responseText = '';
+            let responseClass = '';
+
+            // Handle client-side commands instantly
+            if (cmd === '/clear') {
+                consoleOutput.innerHTML = '<span class="info">CONSOLE BUFFER PURGED.</span><br><br>';
+                return;
+            } else if (cmd === '/clear_history') {
+                commandHistory.length = 0;
+                historyIndex = -1;
+                responseText = `COMMAND HISTORY PURGED.`;
+                responseClass = 'info';
+                await typeWriterEffect(responseText, outputLine);
+                return;
+            } else if (cmd === '/echo') {
+                responseText = `REPLY: ${args}`;
+                responseClass = '';
+                await typeWriterEffect(responseText, outputLine);
+                return;
+            } else if (cmd === '/help') {
+                responseText = `**INITIATING HELP PROTOCOL...**
+
+**Backend-Processed Commands (Simulated AI Capabilities):**
+  - <span class="prompt">/summarize [text]</span>
+    - **Purpose**: To condense large bodies of text into key insights.
+    - **Usage**: Type \`/summarize\` followed by the text you wish to summarize.
+    - **Example**: \`/summarize The quick brown fox jumps over the lazy dog. This is a classic pangram.\`
+    - **Simulated Output**: Identifies key phrases and overall theme.
+
+  - <span class="prompt">/translate [source-target] [text]</span>
+    - **Purpose**: To convert text between specified languages.
+    - **Usage**: Type \`/translate\` followed by a language pair (e.g., \`en-es\` for English to Spanish) and then the text.
+    - **Example**: \`/translate en-fr Hello world, how are you?\`
+    - **Simulated Output**: Provides a placeholder translation in the target language.
+
+  - <span class="prompt">/analyze [data/keywords]</span>
+    - **Purpose**: To process input data, identify patterns, anomalies, and relationships.
+    - **Usage**: Type \`/analyze\` followed by data snippets, keywords, or descriptions of data.
+    - **Example**: \`/analyze sales data from Q3 2024 showing decline\`
+    - **Simulated Output**: Highlights potential trends and suggests further actions.
+
+  - <span class="prompt">/diagnose [module]</span>
+    - **Purpose**: To perform diagnostic checks on specified system modules or components.
+    - **Usage**: Type \`/diagnose\` followed by the module name. Available modules: \`network\`, \`power\`, \`security\`, \`storage\`.
+    - **Example**: \`/diagnose network\`
+    - **Simulated Output**: Reports on the status and health of the specified module.
+
+  - <span class="prompt">/visualize [type]</span>
+    - **Purpose**: To generate textual representations of data visualizations.
+    - **Usage**: Type \`/visualize\` followed by the desired visualization type. Available types: \`bar\`, \`line\`, \`network\`, \`pie\`.
+    - **Example**: \`/visualize bar\`
+    - **Simulated Output**: Describes the type of visualization and its conceptual elements.
+
+  - <span class="prompt">/status</span>
+    - **Purpose**: To display the current operational status of the core AI modules.
+    - **Usage**: Simply type \`/status\`.
+    - **Simulated Output**: Shows if modules are active and general system health.
+
+  - <span class="prompt">/ping</span>
+    - **Purpose**: To test network connectivity and latency to the AI core.
+    - **Usage**: Simply type \`/ping\`.
+    - **Simulated Output**: Provides simulated response times and connection stability.
+
+**Client-Side Commands (Processed directly in your browser):**
+  - <span class="prompt">/echo [text]</span>
+    - **Purpose**: Repeats the input text back to the console. Useful for testing input.
+    - **Usage**: \`/echo This is a test message.\`
+  - <span class="prompt">/clear</span>
+    - **Purpose**: Clears all previous output from the console buffer.
+    - **Usage**: \`/clear\`
+  - <span class="prompt">/clear_history</span>
+    - **Purpose**: Clears the command history, preventing previous commands from appearing with ArrowUp/Down.
+    - **Usage**: \`/clear_history\`
+
+**END HELP PROTOCOL.**`;
+                responseClass = 'info';
+                outputLine.innerHTML = responseText; // Set innerHTML directly for instant display
+                consoleOutput.scrollTop = consoleOutput.scrollHeight;
+                return;
+            }
+
+            // Send other commands to the Flask backend
+            try {
+                const backendEndpoint = document.getElementById('custom-api-endpoint').value || '/api/ai_command';
+
+                const backendResponse = await fetch(backendEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        command: cmd,
+                        arguments: args
+                    }),
+                });
+
+                if (!backendResponse.ok) {
+                    throw new Error(`HTTP error! status: ${backendResponse.status}`);
+                }
+
+                const result = await backendResponse.json();
+                responseText = result.output;
+                responseClass = result.class;
+
+            } catch (error) {
+                console.error('Error communicating with backend:', error);
+                responseText = `ERROR: Backend communication failed. Check if server is running. (${error.message}). If on Replit, ensure the 'Custom Backend Endpoint' in Settings is set to '/api/ai_command'.`;
+                responseClass = 'error';
+            }
+
+            outputLine.className = responseClass;
+            await typeWriterEffect(responseText, outputLine);
+        }
+
+        // Initialize with default focus
+        focusConsoleInput();
+
+        // Optional: Save settings to Local Storage (Simulated for frontend persistence)
+        document.getElementById('openai-api-key').value = localStorage.getItem('openaiApiKey') || '';
+        document.getElementById('google-ai-api-key').value = localStorage.getItem('googleAiApiKey') || '';
+        document.getElementById('custom-api-endpoint').value = localStorage.getItem('customApiEndpoint') || '/api/ai_command';
+        document.getElementById('show-timestamps').checked = JSON.parse(localStorage.getItem('showTimestamps') ?? 'true');
+        document.getElementById('enable-animations-console').checked = JSON.parse(localStorage.getItem('enableConsoleAnimations') ?? 'true');
+
+        // Load and apply theme
+        const savedTheme = localStorage.getItem('terminalTheme') || 'cybernetic';
+        applyTheme(savedTheme);
+        document.querySelector(`input[name="terminal-theme"][value="${savedTheme}"]`).checked = true;
+
+        document.getElementById('openai-api-key').addEventListener('input', (e) => localStorage.setItem('openaiApiKey', e.target.value));
+        document.getElementById('google-ai-api-key').addEventListener('input', (e) => localStorage.setItem('googleAiApiKey', e.target.value));
+        document.getElementById('custom-api-endpoint').addEventListener('input', (e) => localStorage.setItem('customApiEndpoint', e.target.value));
+        document.getElementById('show-timestamps').addEventListener('change', (e) => localStorage.setItem('showTimestamps', e.target.checked));
+        document.getElementById('enable-animations-console').addEventListener('change', (e) => localStorage.setItem('enableConsoleAnimations', e.target.checked));
+
+        themeRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const selectedTheme = e.target.value;
+                localStorage.setItem('terminalTheme', selectedTheme);
+                applyTheme(selectedTheme);
+            });
+        });
+
+    </script>
+</body>
+</html>
